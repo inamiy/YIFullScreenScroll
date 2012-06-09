@@ -120,7 +120,7 @@
         _prevContentOffsetY = MAX(scrollView.contentOffset.y, -scrollView.contentInset.top);
         
         if (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && scrollView.contentOffset.y > 0 && !_isScrollingTop) {
-            deltaY = abs(deltaY);
+            deltaY *= -1;
         }
         
         [self _layoutWithScrollView:scrollView deltaY:deltaY];
