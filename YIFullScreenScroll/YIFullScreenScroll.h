@@ -15,7 +15,7 @@
     BOOL    _isScrollingTop;
 }
 
-@property (strong, nonatomic) UIViewController* viewController;
+@property (weak, nonatomic) UIViewController* viewController;
 
 @property (nonatomic) BOOL enabled;
 @property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;
