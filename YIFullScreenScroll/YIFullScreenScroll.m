@@ -12,7 +12,8 @@
 #define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define STATUS_BAR_HEIGHT   (IS_PORTRAIT ? [UIApplication sharedApplication].statusBarFrame.size.height : [UIApplication sharedApplication].statusBarFrame.size.width)
 
-#define MIN_SCROLL_DISTANCE_FOR_FULLSCREEN  44
+#define MAX_SHIFT_PER_SCROLL    10
+
 
 @implementation YIFullScreenScroll
 
@@ -121,6 +122,13 @@
         
         if (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && scrollView.contentOffset.y > 0 && !_isScrollingTop) {
             deltaY *= -1;
+        }
+        
+        if (deltaY > MAX_SHIFT_PER_SCROLL) {
+            deltaY = MAX_SHIFT_PER_SCROLL;
+        }
+        else if (deltaY < -MAX_SHIFT_PER_SCROLL) {
+            deltaY = -MAX_SHIFT_PER_SCROLL;
         }
         
         [self _layoutWithScrollView:scrollView deltaY:deltaY];

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+
 @interface YIFullScreenScroll : NSObject <UIScrollViewDelegate>
 {
     CGFloat _prevContentOffsetY;
