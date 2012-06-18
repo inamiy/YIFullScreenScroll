@@ -127,7 +127,8 @@
         if (deltaY > MAX_SHIFT_PER_SCROLL) {
             deltaY = MAX_SHIFT_PER_SCROLL;
         }
-        else if (deltaY < -MAX_SHIFT_PER_SCROLL) {
+        // NOTE: scrollView.contentOffset.y > 0 is preferred when navBar is partially hidden & scrolled-up very fast
+        else if (deltaY < -MAX_SHIFT_PER_SCROLL && scrollView.contentOffset.y > 0) {
             deltaY = -MAX_SHIFT_PER_SCROLL;
         }
         
