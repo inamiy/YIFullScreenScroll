@@ -33,11 +33,12 @@
     _fullScreenDelegate = [[YIFullScreenScroll alloc] initWithViewController:self];
     _fullScreenDelegate.shouldShowUIBarsOnScrollUp = YES;
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    // pulldown dummy view (red)
+    // TODO: avoid navBar-translucency when rotating
+    UIView *pulldownDummyView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, self.view.frame.size.width, self.tableView.bounds.size.height)];
+    pulldownDummyView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    pulldownDummyView.backgroundColor = [UIColor redColor];
+    [self.tableView addSubview:pulldownDummyView];
 }
 
 - (void)viewWillAppear:(BOOL)animated

@@ -21,7 +21,13 @@
 @property (nonatomic) BOOL enabled;
 @property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;
 
-- (id)initWithViewController:(UIViewController*)viewController;
+//
+// NOTE:
+// YIFullScreenScroll forces viewController.navigationController's navigationBar/toolbar 
+// to set translucent=YES (to set navigationController's content size wider for convenience).
+//
+- (id)initWithViewController:(UIViewController*)viewController; // default: ignoreTranslucent=YES
+- (id)initWithViewController:(UIViewController*)viewController ignoreTranslucent:(BOOL)ignoreTranslucent;
 
 - (void)layoutTabBarController; // set on viewDidAppear, if using tabBarController
 

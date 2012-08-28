@@ -23,13 +23,56 @@
 
 - (id)initWithViewController:(UIViewController*)viewController
 {
+    return [self initWithViewController:viewController ignoreTranslucent:YES];
+}
+
+- (id)initWithViewController:(UIViewController*)viewController ignoreTranslucent:(BOOL)ignoreTranslucent
+{
     self = [super init];
     if (self) {
         self.enabled = YES;
         self.shouldShowUIBarsOnScrollUp = YES;
         
-        viewController.navigationController.navigationBar.translucent = YES;
-        viewController.navigationController.toolbar.translucent = YES;
+        if (viewController.navigationController) {
+            
+            if (viewController.navigationController.navigationBar) {
+                
+                // hide original background & add non-translucent one
+                if (ignoreTranslucent) {
+                    UIImageView* navBarBackground = [viewController.navigationController.navigationBar.subviews objectAtIndex:0];
+                    navBarBackground.hidden = YES;
+                    
+                    UIImage* navBarImage = [navBarBackground.image copy];
+                    UIImageView* navBarImageView = [[UIImageView alloc] initWithImage:navBarImage];
+                    navBarImageView.opaque = YES;
+                    navBarImageView.frame = navBarBackground.frame;
+                    navBarImageView.autoresizingMask = navBarBackground.autoresizingMask;
+                    [viewController.navigationController.navigationBar insertSubview:navBarImageView atIndex:0];
+                }
+                
+                viewController.navigationController.navigationBar.translucent = YES;
+            }
+            
+            if (viewController.navigationController.toolbar) {
+                
+                // hide original background & add non-translucent one
+                if (ignoreTranslucent) {
+                    UIImageView* toolbarBackground = [viewController.navigationController.toolbar.subviews objectAtIndex:0];
+                    toolbarBackground.hidden = YES;
+                    
+                    UIImage* toolbarImage = [toolbarBackground.image copy];
+                    UIImageView* toolbarImageView = [[UIImageView alloc] initWithImage:toolbarImage];
+                    toolbarImageView.opaque = YES;
+                    toolbarImageView.frame = toolbarBackground.frame;
+                    toolbarImageView.autoresizingMask = toolbarBackground.autoresizingMask;
+                    [viewController.navigationController.toolbar insertSubview:toolbarImageView atIndex:0];
+                }
+                
+                viewController.navigationController.toolbar.translucent = YES;
+            }
+            
+        }
+        
         _viewController = viewController;
     }
     return self;
