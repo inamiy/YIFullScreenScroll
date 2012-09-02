@@ -159,7 +159,7 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if (scrollView.dragging || _isScrollingTop) {
+    if (scrollView.dragging || scrollView.decelerating || _isScrollingTop) {
         CGFloat deltaY = scrollView.contentOffset.y-_prevContentOffsetY;
         _prevContentOffsetY = MAX(scrollView.contentOffset.y, -scrollView.contentInset.top);
         
