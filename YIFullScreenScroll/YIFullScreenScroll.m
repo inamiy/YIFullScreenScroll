@@ -16,6 +16,9 @@
 
 
 @implementation YIFullScreenScroll
+{
+    BOOL _willScrollToBottom;
+}
 
 @synthesize viewController = _viewController;
 @synthesize enabled = _enabled;
@@ -155,6 +158,7 @@
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
     _prevContentOffsetY = scrollView.contentOffset.y;
+    _willScrollToBottom = NO;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -163,8 +167,13 @@
         CGFloat deltaY = scrollView.contentOffset.y-_prevContentOffsetY;
         _prevContentOffsetY = MAX(scrollView.contentOffset.y, -scrollView.contentInset.top);
         
-        if (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && scrollView.contentOffset.y > 0 && !_isScrollingTop) {
-            deltaY *= -1;
+        //
+        // Don't let UI-bars appear when:
+        // 1. scroll reaches to bottom
+        // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (ignore status-bar-tap)
+        //
+        if (_willScrollToBottom || (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && scrollView.contentOffset.y > 0 && !_isScrollingTop)) {
+            deltaY = fabs(deltaY);
         }
         
         if (deltaY > MAX_SHIFT_PER_SCROLL) {
@@ -179,10 +188,16 @@
     }
 }
 
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+    _willScrollToBottom = (velocity.y > 0 && (*targetContentOffset).y+scrollView.bounds.size.height >= scrollView.contentSize.height+scrollView.contentInset.bottom);
+}
+
 - (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView
 {
     _prevContentOffsetY = scrollView.contentOffset.y;
     _isScrollingTop = YES;
+    _willScrollToBottom = NO;
     return YES;
 }
 
