@@ -18,6 +18,16 @@
 @implementation YIFullScreenScroll
 {
     BOOL _willScrollToBottom;
+    
+    UINavigationBar*    _navigationBar;
+    UIToolbar*          _toolbar;
+    UITabBar*           _tabBar;
+    
+    UIImageView*        _opaqueNavBarBackground;
+    UIImageView*        _opaqueToolbarBackground;
+    
+    char _navBarContext;
+    char _toolbarContext;
 }
 
 @synthesize viewController = _viewController;
@@ -36,64 +46,180 @@
         self.enabled = YES;
         self.shouldShowUIBarsOnScrollUp = YES;
         
-        if (viewController.navigationController) {
+        _viewController = viewController;
+        
+        if (_viewController.navigationController) {
             
-            if (viewController.navigationController.navigationBar) {
+            UINavigationBar* navBar = self.navigationBar;
+            if (navBar) {
                 
                 // hide original background & add non-translucent one
                 if (ignoreTranslucent) {
-                    UIImageView* navBarBackground = [viewController.navigationController.navigationBar.subviews objectAtIndex:0];
-                    navBarBackground.hidden = YES;
-                    
-                    UIImage* navBarImage = [navBarBackground.image copy];
-                    UIImageView* navBarImageView = [[UIImageView alloc] initWithImage:navBarImage];
-                    navBarImageView.opaque = YES;
-                    navBarImageView.frame = navBarBackground.frame;
-                    navBarImageView.autoresizingMask = navBarBackground.autoresizingMask;
-                    [viewController.navigationController.navigationBar insertSubview:navBarImageView atIndex:0];
+                    [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
                 }
                 
-                viewController.navigationController.navigationBar.translucent = YES;
+                navBar.translucent = YES;
+                
+                [navBar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&_navBarContext];
             }
             
-            if (viewController.navigationController.toolbar) {
+            UIToolbar* toolbar = self.toolbar;
+            if (toolbar) {
                 
                 // hide original background & add non-translucent one
                 if (ignoreTranslucent) {
-                    UIImageView* toolbarBackground = [viewController.navigationController.toolbar.subviews objectAtIndex:0];
-                    toolbarBackground.hidden = YES;
-                    
-                    UIImage* toolbarImage = [toolbarBackground.image copy];
-                    UIImageView* toolbarImageView = [[UIImageView alloc] initWithImage:toolbarImage];
-                    toolbarImageView.opaque = YES;
-                    toolbarImageView.frame = toolbarBackground.frame;
-                    toolbarImageView.autoresizingMask = toolbarBackground.autoresizingMask;
-                    [viewController.navigationController.toolbar insertSubview:toolbarImageView atIndex:0];
+                    [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:toolbar];
                 }
                 
-                viewController.navigationController.toolbar.translucent = YES;
+                toolbar.translucent = YES;
+                
+                [toolbar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&_toolbarContext];
             }
             
         }
-        
-        _viewController = viewController;
     }
     return self;
 }
+
+- (void)_hideOriginalAndAddOpaqueBackgroundOnUIBar:(UIView*)bar
+{
+    // temporally set translucent=NO to copy opaque backgroundImage
+    if (bar == self.navigationBar) {
+        [_opaqueNavBarBackground removeFromSuperview];
+        self.navigationBar.translucent = NO;
+    }
+    else if (bar == self.toolbar) {
+        [_opaqueToolbarBackground removeFromSuperview];
+        self.toolbar.translucent = NO;
+    }
+    else {
+        return;
+    }
+    
+    UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
+    originalBackground.hidden = YES;
+    
+    UIImage* opaqueBarImage = [originalBackground.image copy];
+    UIImageView* opaqueBarImageView = [[UIImageView alloc] initWithImage:opaqueBarImage];
+    opaqueBarImageView.opaque = YES;
+    opaqueBarImageView.frame = originalBackground.frame;
+    opaqueBarImageView.autoresizingMask = originalBackground.autoresizingMask;
+    [bar insertSubview:opaqueBarImageView atIndex:0];
+    
+    if (bar == self.navigationBar) {
+        self.navigationBar.translucent = YES;
+        _opaqueNavBarBackground = opaqueBarImageView;
+    }
+    else if (bar == self.toolbar) {
+        self.toolbar.translucent = YES;
+        _opaqueToolbarBackground = opaqueBarImageView;
+    }
+}
+
+- (void)_showOriginalAndRemoveOpaqueBackgroundOnUIBar:(UIView*)bar
+{
+    if (bar == self.navigationBar) {
+        [_opaqueNavBarBackground removeFromSuperview];
+    }
+    else if (bar == self.toolbar) {
+        [_opaqueToolbarBackground removeFromSuperview];
+    }
+    else {
+        return;
+    }
+    
+    UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
+    originalBackground.hidden = NO;
+}
+
+- (void)dealloc
+{
+    [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.navigationBar];
+    [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.toolbar];
+    
+    [self.navigationBar removeObserver:self forKeyPath:@"tintColor" context:&_navBarContext];
+    [self.toolbar removeObserver:self forKeyPath:@"tintColor" context:&_toolbarContext];
+    
+    _navigationBar = nil;
+    _toolbar = nil;
+    _tabBar = nil;
+}
+
+#pragma mark -
+
+#pragma mark Public
+
+- (void)layoutTabBarController
+{
+    if (_viewController.tabBarController) {
+        UIView* tabBarTransitionView = [_viewController.tabBarController.view.subviews objectAtIndex:0];
+        tabBarTransitionView.frame = _viewController.tabBarController.view.bounds;
+    }
+}
+
+- (void)showUIBarsWithScrollView:(UIScrollView*)scrollView animated:(BOOL)animated
+{
+    [UIView animateWithDuration:(animated ? 0.1 : 0) animations:^{
+        [self _layoutWithScrollView:scrollView deltaY:-50];
+    }];
+}
+
+#pragma mark -
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (context == &_navBarContext || context == &_toolbarContext) {
+        [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:object];
+    }
+}
+
+#pragma mark -
+
+#pragma mark UIBars
+
+- (UINavigationBar*)navigationBar
+{
+    if (!_navigationBar) {
+        _navigationBar = _viewController.navigationController.navigationBar;
+    }
+    return _navigationBar;
+}
+
+- (UIToolbar*)toolbar
+{
+    if (!_toolbar) {
+        _toolbar = _viewController.navigationController.toolbar;
+    }
+    return _toolbar;
+}
+
+- (UITabBar*)tabBar
+{
+    if (!_tabBar) {
+        _tabBar = _viewController.tabBarController.tabBar;
+    }
+    return _tabBar;
+}
+
+#pragma mark -
+
+#pragma mark Scroll & Layout
 
 - (void)_layoutWithScrollView:(UIScrollView*)scrollView deltaY:(CGFloat)deltaY
 {
     if (!self.enabled) return;
     
     // navbar
-    UINavigationBar* navBar = _viewController.navigationController.navigationBar;
+    UINavigationBar* navBar = self.navigationBar;
     BOOL isNavBarExisting = navBar && navBar.superview && !navBar.hidden;
     if (isNavBarExisting) {
         navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
     }
     
     // toolbar
-    UIToolbar* toolbar = _viewController.navigationController.toolbar;
+    UIToolbar* toolbar = self.toolbar;
     BOOL isToolbarExisting = toolbar && toolbar.superview && !toolbar.hidden;
     CGFloat toolbarSuperviewHeight = 0;
     if (isToolbarExisting) {
@@ -108,7 +234,7 @@
     }
     
     // tabBar
-    UITabBar* tabBar = _viewController.tabBarController.tabBar;
+    UITabBar* tabBar = self.tabBar;
     BOOL isTabBarExisting = tabBar && tabBar.superview && !tabBar.hidden && (tabBar.left == 0);
     CGFloat tabBarSuperviewHeight = 0;
     if (isTabBarExisting) {
@@ -134,23 +260,6 @@
         insets.bottom += tabBarSuperviewHeight-tabBar.top;
     }
     scrollView.scrollIndicatorInsets = insets;
-}
-
-#pragma mark -
-
-- (void)layoutTabBarController
-{
-    if (_viewController.tabBarController) {
-        UIView* tabBarTransitionView = [_viewController.tabBarController.view.subviews objectAtIndex:0];
-        tabBarTransitionView.frame = _viewController.tabBarController.view.bounds;
-    }
-}
-
-- (void)showUIBarsWithScrollView:(UIScrollView*)scrollView animated:(BOOL)animated
-{
-    [UIView animateWithDuration:(animated ? 0.1 : 0) animations:^{
-        [self _layoutWithScrollView:scrollView deltaY:-50];
-    }];
 }
 
 #pragma mark UIScrollViewDelegate
