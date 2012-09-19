@@ -28,6 +28,9 @@
     
     char _navBarContext;
     char _toolbarContext;
+    
+    BOOL _isNavBarInitiallyTranslucent;
+    BOOL _isToolbarInitiallyTranslucent;
 }
 
 @synthesize viewController = _viewController;
@@ -53,6 +56,8 @@
             UINavigationBar* navBar = self.navigationBar;
             if (navBar) {
                 
+                _isNavBarInitiallyTranslucent = navBar.translucent;
+                
                 // hide original background & add non-translucent one
                 if (ignoreTranslucent) {
                     [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
@@ -65,6 +70,8 @@
             
             UIToolbar* toolbar = self.toolbar;
             if (toolbar) {
+                
+                _isToolbarInitiallyTranslucent = toolbar.translucent;
                 
                 // hide original background & add non-translucent one
                 if (ignoreTranslucent) {
@@ -139,6 +146,9 @@
     
     [self.navigationBar removeObserver:self forKeyPath:@"tintColor" context:&_navBarContext];
     [self.toolbar removeObserver:self forKeyPath:@"tintColor" context:&_toolbarContext];
+    
+    self.navigationBar.translucent = _isNavBarInitiallyTranslucent;
+    self.toolbar.translucent = _isToolbarInitiallyTranslucent;
     
     _navigationBar = nil;
     _toolbar = nil;
