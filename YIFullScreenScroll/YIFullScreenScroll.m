@@ -90,14 +90,28 @@
 
 - (void)_hideOriginalAndAddOpaqueBackgroundOnUIBar:(UIView*)bar
 {
+    BOOL isUIBarHidden = NO;
+    
     // temporally set translucent=NO to copy opaque backgroundImage
     if (bar == self.navigationBar) {
         [_opaqueNavBarBackground removeFromSuperview];
         self.navigationBar.translucent = NO;
+        
+        // temporally show navigationBar to copy backgroundImage safely
+        isUIBarHidden = _viewController.navigationController.navigationBarHidden;
+        if (isUIBarHidden) {
+            [_viewController.navigationController setNavigationBarHidden:NO];
+        }
     }
     else if (bar == self.toolbar) {
         [_opaqueToolbarBackground removeFromSuperview];
         self.toolbar.translucent = NO;
+        
+        // temporally show toolbar to copy backgroundImage safely
+        isUIBarHidden = _viewController.navigationController.toolbarHidden;
+        if (isUIBarHidden) {
+            [_viewController.navigationController setToolbarHidden:NO];
+        }
     }
     else {
         return;
@@ -116,10 +130,20 @@
     if (bar == self.navigationBar) {
         self.navigationBar.translucent = YES;
         _opaqueNavBarBackground = opaqueBarImageView;
+        
+        // hide navigationBar if needed
+        if (isUIBarHidden) {
+            [_viewController.navigationController setNavigationBarHidden:YES];
+        }
     }
     else if (bar == self.toolbar) {
         self.toolbar.translucent = YES;
         _opaqueToolbarBackground = opaqueBarImageView;
+        
+        // hide toolbar if needed
+        if (isUIBarHidden) {
+            [_viewController.navigationController setToolbarHidden:YES];
+        }
     }
 }
 
