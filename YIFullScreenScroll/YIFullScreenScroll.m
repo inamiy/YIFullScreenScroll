@@ -26,11 +26,16 @@
     UIImageView*        _opaqueNavBarBackground;
     UIImageView*        _opaqueToolbarBackground;
     
-    char _navBarContext;
-    char _toolbarContext;
+    BOOL _isObservingNavBar;
+    BOOL _isObservingToolbar;
     
-    BOOL _isNavBarInitiallyTranslucent;
-    BOOL _isToolbarInitiallyTranslucent;
+    BOOL _isNavBarTranslucentOnInit;
+    BOOL _isToolbarTranslucentOnInit;
+    
+    BOOL _hasOpaqueNavBarBackgroundOnInit;
+    BOOL _hasOpaqueToolbarBackgroundOnInit;
+    
+    BOOL _ignoresTranslucent;
 }
 
 @synthesize viewController = _viewController;
@@ -46,46 +51,120 @@
 {
     self = [super init];
     if (self) {
+        
+        _viewController = viewController;
+        _ignoresTranslucent = ignoreTranslucent;
+        
+        if (![self _hasOpaqueBackgroundOnUIBar:self.navigationBar]) {
+            _hasOpaqueNavBarBackgroundOnInit = NO;
+            _isNavBarTranslucentOnInit = self.navigationBar.translucent;
+        }
+        else {
+            _hasOpaqueNavBarBackgroundOnInit = YES;
+        }
+        
+        if (![self _hasOpaqueBackgroundOnUIBar:self.toolbar]) {
+            _hasOpaqueToolbarBackgroundOnInit = NO;
+            _isToolbarTranslucentOnInit = self.toolbar.translucent;
+        }
+        else {
+            _hasOpaqueToolbarBackgroundOnInit = YES;
+        }
+        
         self.enabled = YES;
         self.shouldShowUIBarsOnScrollUp = YES;
         
-        _viewController = viewController;
-        
-        if (_viewController.navigationController) {
-            
-            UINavigationBar* navBar = self.navigationBar;
-            if (navBar) {
-                
-                _isNavBarInitiallyTranslucent = navBar.translucent;
-                
-                // hide original background & add non-translucent one
-                if (ignoreTranslucent) {
-                    [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
-                }
-                
-                navBar.translucent = YES;
-                
-                [navBar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&_navBarContext];
-            }
-            
-            UIToolbar* toolbar = self.toolbar;
-            if (toolbar) {
-                
-                _isToolbarInitiallyTranslucent = toolbar.translucent;
-                
-                // hide original background & add non-translucent one
-                if (ignoreTranslucent) {
-                    [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:toolbar];
-                }
-                
-                toolbar.translucent = YES;
-                
-                [toolbar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&_toolbarContext];
-            }
-            
-        }
     }
     return self;
+}
+
+- (void)_setupUIBarBackgrounds
+{
+    if (_viewController.navigationController) {
+        
+        UINavigationBar* navBar = self.navigationBar;
+        if (navBar) {
+            
+            // hide original background & add non-translucent one
+            if (_ignoresTranslucent) {
+                [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
+                
+                if (!_isObservingNavBar) {
+                    [navBar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+                    _isObservingNavBar = YES;
+                }
+                
+            }
+            
+            navBar.translucent = YES;
+        }
+        
+        UIToolbar* toolbar = self.toolbar;
+        if (toolbar) {
+            
+            // hide original background & add non-translucent one
+            if (_ignoresTranslucent) {
+                [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:toolbar];
+                
+                if (!_isObservingToolbar) {
+                    [toolbar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+                    _isObservingToolbar = YES;
+                }
+                
+            }
+            
+            toolbar.translucent = YES;
+        }
+        
+    }
+}
+
+- (void)_teardownUIBarBackgrounds
+{
+    if (_ignoresTranslucent) {
+        if (!_hasOpaqueNavBarBackgroundOnInit) {
+            [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.navigationBar];
+        }
+        if (!_hasOpaqueToolbarBackgroundOnInit) {
+            [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.toolbar];
+        }
+        
+        if (_isObservingNavBar) {
+            [self.navigationBar removeObserver:self forKeyPath:@"tintColor" context:NULL];
+            _isObservingNavBar= NO;
+        }
+        if (_isObservingToolbar) {
+            [self.toolbar removeObserver:self forKeyPath:@"tintColor" context:NULL];
+            _isObservingToolbar = NO;
+        }
+    }
+
+    // set UI-bars back to initial state if all of fullScreenScroll is deallocated
+    if (!_hasOpaqueNavBarBackgroundOnInit) {
+        self.navigationBar.translucent = _isNavBarTranslucentOnInit;
+    }
+    if (!_hasOpaqueToolbarBackgroundOnInit) {
+        self.toolbar.translucent = _isToolbarTranslucentOnInit;
+    }
+    
+    _navigationBar = nil;
+    _toolbar = nil;
+}
+
+- (BOOL)_hasOpaqueBackgroundOnUIBar:(UIView*)bar
+{
+    if ([bar.subviews count] <= 1) return NO;
+    
+    UIView* subview1 = [bar.subviews objectAtIndex:1];
+    
+    if (![subview1 isKindOfClass:[UIImageView class]]) return NO;
+    
+    if (CGRectEqualToRect(bar.bounds, subview1.frame)) {
+        return YES;
+    }
+    else {
+        return NO;
+    }
 }
 
 - (void)_hideOriginalAndAddOpaqueBackgroundOnUIBar:(UIView*)bar
@@ -117,15 +196,25 @@
         return;
     }
     
-    UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
-    originalBackground.hidden = YES;
+    UIImageView* originalBackground = nil;
+    UIImageView* opaqueBarImageView = nil;
     
-    UIImage* opaqueBarImage = [originalBackground.image copy];
-    UIImageView* opaqueBarImageView = [[UIImageView alloc] initWithImage:opaqueBarImage];
+    // use existing opaque background
+    if ([self _hasOpaqueBackgroundOnUIBar:bar]) {
+        originalBackground = [bar.subviews objectAtIndex:1];
+        opaqueBarImageView = [bar.subviews objectAtIndex:0];
+        opaqueBarImageView.image = [originalBackground.image copy];
+    }
+    // create opaque background
+    else {
+        originalBackground = [bar.subviews objectAtIndex:0];
+        opaqueBarImageView = [[UIImageView alloc] initWithImage:[originalBackground.image copy]];
+        [bar insertSubview:opaqueBarImageView atIndex:0];
+    }
+    originalBackground.hidden = YES;
     opaqueBarImageView.opaque = YES;
     opaqueBarImageView.frame = originalBackground.frame;
     opaqueBarImageView.autoresizingMask = originalBackground.autoresizingMask;
-    [bar insertSubview:opaqueBarImageView atIndex:0];
     
     if (bar == self.navigationBar) {
         self.navigationBar.translucent = YES;
@@ -165,18 +254,25 @@
 
 - (void)dealloc
 {
-    [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.navigationBar];
-    [self _showOriginalAndRemoveOpaqueBackgroundOnUIBar:self.toolbar];
-    
-    [self.navigationBar removeObserver:self forKeyPath:@"tintColor" context:&_navBarContext];
-    [self.toolbar removeObserver:self forKeyPath:@"tintColor" context:&_toolbarContext];
-    
-    self.navigationBar.translucent = _isNavBarInitiallyTranslucent;
-    self.toolbar.translucent = _isToolbarInitiallyTranslucent;
-    
-    _navigationBar = nil;
-    _toolbar = nil;
+    [self _teardownUIBarBackgrounds];
     _tabBar = nil;
+}
+
+#pragma mark -
+
+#pragma mark Accessors
+
+- (void)setEnabled:(BOOL)enabled
+{
+    _enabled = enabled;
+    
+    if (enabled) {
+        [self _setupUIBarBackgrounds];
+    }
+    else {
+        [self _teardownUIBarBackgrounds];
+    }
+    
 }
 
 #pragma mark -
@@ -204,7 +300,9 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context == &_navBarContext || context == &_toolbarContext) {
+    if (!self.enabled) return;
+    
+    if ([keyPath isEqualToString:@"tintColor"]) {
         [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:object];
     }
 }

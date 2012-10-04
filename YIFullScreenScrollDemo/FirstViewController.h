@@ -10,4 +10,7 @@
 
 @interface FirstViewController : UITableViewController
 
+- (IBAction)handleToggleButton:(id)sender;
+- (IBAction)handleTintColorButton:(id)sender;
+
 @end

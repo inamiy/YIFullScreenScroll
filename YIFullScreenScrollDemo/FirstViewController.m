@@ -48,7 +48,6 @@
     if (self.toolbarItems.count == 0) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
-    
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -68,11 +67,40 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    
+    _fullScreenDelegate = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return YES;
+}
+
+- (void)didReceiveMemoryWarning
+{
+    // make sure to release before viewController deallocates!
+    _fullScreenDelegate = nil;
+}
+
+#pragma mark -
+
+#pragma mark IBActions
+
+- (IBAction)handleToggleButton:(id)sender
+{
+    if (_fullScreenDelegate.enabled) {
+        [_fullScreenDelegate showUIBarsWithScrollView:self.tableView animated:NO];
+    }
+    
+    _fullScreenDelegate.enabled = !_fullScreenDelegate.enabled;
+}
+
+- (IBAction)handleTintColorButton:(id)sender
+{
+    UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:1 brightness:1 alpha:1];
+    
+    self.navigationController.navigationBar.tintColor = randomColor;
+    self.navigationController.toolbar.tintColor = randomColor;
 }
 
 #pragma mark -
@@ -169,6 +197,8 @@
 //    [self.tabBarController setTabBarHidden:NO animated:YES];
     
     [_fullScreenDelegate showUIBarsWithScrollView:tableView animated:YES];
+    
+    [self handleTintColorButton:nil];
 }
 
 #pragma mark -
