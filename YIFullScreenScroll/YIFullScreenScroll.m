@@ -41,6 +41,9 @@
 @synthesize viewController = _viewController;
 @synthesize enabled = _enabled;
 @synthesize shouldShowUIBarsOnScrollUp = _shouldShowUIBarsOnScrollUp;
+@synthesize shouldHideNavigationBarOnScroll = _shouldHideNavigationBarOnScroll;
+@synthesize shouldHideToolbarOnScroll = _shouldHideToolbarOnScroll;
+@synthesize shouldHideTabBarOnScroll = _shouldHideTabBarOnScroll;
 
 - (id)initWithViewController:(UIViewController*)viewController
 {
@@ -54,6 +57,11 @@
         
         _viewController = viewController;
         _ignoresTranslucent = ignoreTranslucent;
+        
+        _shouldShowUIBarsOnScrollUp = YES;
+        _shouldHideNavigationBarOnScroll = YES;
+        _shouldHideToolbarOnScroll = YES;
+        _shouldHideTabBarOnScroll = YES;
         
         if (![self _hasOpaqueBackgroundOnUIBar:self.navigationBar]) {
             _hasOpaqueNavBarBackgroundOnInit = NO;
@@ -72,7 +80,6 @@
         }
         
         self.enabled = YES;
-        self.shouldShowUIBarsOnScrollUp = YES;
         
     }
     return self;
@@ -83,39 +90,43 @@
     if (_viewController.navigationController) {
         
         UINavigationBar* navBar = self.navigationBar;
-        if (navBar) {
+        UIToolbar* toolbar = self.toolbar;
             
-            // hide original background & add non-translucent one
-            if (_ignoresTranslucent) {
-                [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
-                
-                if (!_isObservingNavBar) {
-                    [navBar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
-                    _isObservingNavBar = YES;
-                }
-                
+        // hide original background & add non-translucent one
+        if (_ignoresTranslucent) {
+            [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:navBar];
+            
+            if (!_isObservingNavBar) {
+                [navBar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+                _isObservingNavBar = YES;
             }
             
+        }
+        
+        if (_shouldHideNavigationBarOnScroll) {
             navBar.translucent = YES;
         }
-        
-        UIToolbar* toolbar = self.toolbar;
-        if (toolbar) {
-            
-            // hide original background & add non-translucent one
-            if (_ignoresTranslucent) {
-                [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:toolbar];
-                
-                if (!_isObservingToolbar) {
-                    [toolbar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
-                    _isObservingToolbar = YES;
-                }
-                
-            }
-            
-            toolbar.translucent = YES;
+        else {
+            navBar.translucent = NO;
         }
         
+        // hide original background & add non-translucent one
+        if (_ignoresTranslucent) {
+            [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:toolbar];
+            
+            if (!_isObservingToolbar) {
+                [toolbar addObserver:self forKeyPath:@"tintColor" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+                _isObservingToolbar = YES;
+            }
+            
+        }
+        
+        if (_shouldHideToolbarOnScroll) {
+            toolbar.translucent = YES;
+        }
+        else {
+            toolbar.translucent = NO;
+        }
     }
 }
 
@@ -169,6 +180,8 @@
 
 - (void)_hideOriginalAndAddOpaqueBackgroundOnUIBar:(UIView*)bar
 {
+    if (!bar) return;
+    
     BOOL isUIBarHidden = NO;
     
     // temporally set translucent=NO to copy opaque backgroundImage
@@ -191,9 +204,6 @@
         if (isUIBarHidden) {
             [_viewController.navigationController setToolbarHidden:NO];
         }
-    }
-    else {
-        return;
     }
     
     UIImageView* originalBackground = nil;
@@ -283,7 +293,10 @@
 
 - (void)layoutTabBarController
 {
-    if (_enabled && _viewController.tabBarController) {
+    if (!_enabled) return;
+    if (!_shouldHideTabBarOnScroll) return;
+    
+    if (_viewController.tabBarController) {
         UIView* tabBarTransitionView = [_viewController.tabBarController.view.subviews objectAtIndex:0];
         tabBarTransitionView.frame = _viewController.tabBarController.view.bounds;
     }
@@ -348,7 +361,7 @@
     // navbar
     UINavigationBar* navBar = self.navigationBar;
     BOOL isNavBarExisting = navBar && navBar.superview && !navBar.hidden && !_viewController.navigationController.navigationBarHidden;
-    if (isNavBarExisting) {
+    if (isNavBarExisting && _shouldHideNavigationBarOnScroll) {
         navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
     }
     
@@ -356,7 +369,7 @@
     UIToolbar* toolbar = self.toolbar;
     BOOL isToolbarExisting = toolbar && toolbar.superview && !toolbar.hidden && !_viewController.navigationController.toolbarHidden;
     CGFloat toolbarSuperviewHeight = 0;
-    if (isToolbarExisting) {
+    if (isToolbarExisting && _shouldHideToolbarOnScroll) {
         // NOTE: if navC.view.superview == window, navC.view won't change its frame and only rotate-transform
         if ([toolbar.superview.superview isKindOfClass:[UIWindow class]]) {
             toolbarSuperviewHeight = IS_PORTRAIT ? toolbar.superview.height : toolbar.superview.width;
@@ -371,7 +384,7 @@
     UITabBar* tabBar = self.tabBar;
     BOOL isTabBarExisting = tabBar && tabBar.superview && !tabBar.hidden && (tabBar.left == 0);
     CGFloat tabBarSuperviewHeight = 0;
-    if (isTabBarExisting) {
+    if (isTabBarExisting && _shouldHideTabBarOnScroll) {
         if ([tabBar.superview.superview isKindOfClass:[UIWindow class]]) {
             tabBarSuperviewHeight = IS_PORTRAIT ? tabBar.superview.height : tabBar.superview.width;
         }
@@ -383,14 +396,14 @@
     
     // scrollIndicatorInsets
     UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
-    if (isNavBarExisting) {
+    if (isNavBarExisting && _shouldHideNavigationBarOnScroll) {
         insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
     }
     insets.bottom = 0;
-    if (isToolbarExisting) {
+    if (isToolbarExisting && _shouldHideToolbarOnScroll) {
         insets.bottom += toolbarSuperviewHeight-toolbar.top;
     }
-    if (isTabBarExisting) {
+    if (isTabBarExisting && _shouldHideTabBarOnScroll) {
         insets.bottom += tabBarSuperviewHeight-tabBar.top;
     }
     scrollView.scrollIndicatorInsets = insets;

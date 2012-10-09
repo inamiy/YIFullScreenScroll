@@ -31,7 +31,12 @@
     [super viewDidLoad];
     
     _fullScreenDelegate = [[YIFullScreenScroll alloc] initWithViewController:self];
-    _fullScreenDelegate.shouldShowUIBarsOnScrollUp = YES;
+    
+//    _fullScreenDelegate.shouldShowUIBarsOnScrollUp = NO;
+    
+//    _fullScreenDelegate.shouldHideNavigationBarOnScroll = NO;
+//    _fullScreenDelegate.shouldHideToolbarOnScroll = NO;
+//    _fullScreenDelegate.shouldHideTabBarOnScroll = NO;
     
     // pulldown dummy view (red)
     // TODO: avoid navBar-translucency when rotating

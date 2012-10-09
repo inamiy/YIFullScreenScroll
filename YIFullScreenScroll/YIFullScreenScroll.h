@@ -19,7 +19,12 @@
 @property (weak, nonatomic) UIViewController* viewController;
 
 @property (nonatomic) BOOL enabled;
-@property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;
+
+@property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;      // default=YES
+
+@property (nonatomic) BOOL shouldHideNavigationBarOnScroll; // default=YES
+@property (nonatomic) BOOL shouldHideToolbarOnScroll;       // default=YES
+@property (nonatomic) BOOL shouldHideTabBarOnScroll;        // default=YES
 
 //
 // NOTE:
