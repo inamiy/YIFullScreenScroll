@@ -347,14 +347,14 @@
     
     // navbar
     UINavigationBar* navBar = self.navigationBar;
-    BOOL isNavBarExisting = navBar && navBar.superview && !navBar.hidden;
+    BOOL isNavBarExisting = navBar && navBar.superview && !navBar.hidden && !_viewController.navigationController.navigationBarHidden;
     if (isNavBarExisting) {
         navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
     }
     
     // toolbar
     UIToolbar* toolbar = self.toolbar;
-    BOOL isToolbarExisting = toolbar && toolbar.superview && !toolbar.hidden;
+    BOOL isToolbarExisting = toolbar && toolbar.superview && !toolbar.hidden && !_viewController.navigationController.toolbarHidden;
     CGFloat toolbarSuperviewHeight = 0;
     if (isToolbarExisting) {
         // NOTE: if navC.view.superview == window, navC.view won't change its frame and only rotate-transform
