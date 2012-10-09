@@ -283,7 +283,7 @@
 
 - (void)layoutTabBarController
 {
-    if (_viewController.tabBarController) {
+    if (_enabled && _viewController.tabBarController) {
         UIView* tabBarTransitionView = [_viewController.tabBarController.view.subviews objectAtIndex:0];
         tabBarTransitionView.frame = _viewController.tabBarController.view.bounds;
     }
