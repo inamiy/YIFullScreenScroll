@@ -80,6 +80,7 @@
         }
         
         self.enabled = YES;
+        [self _setupUIBarBackgrounds];
         
     }
     return self;
@@ -278,12 +279,12 @@
 {
     _enabled = enabled;
     
-    if (enabled) {
-        [self _setupUIBarBackgrounds];
-    }
-    else {
-        [self _teardownUIBarBackgrounds];
-    }
+//    if (enabled) {
+//        [self _setupUIBarBackgrounds];
+//    }
+//    else {
+//        [self _teardownUIBarBackgrounds];
+//    }
     
 }
 
@@ -315,7 +316,8 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (!self.enabled) return;
+    // comment-out (should tintColor even when disabled)
+    //if (!self.enabled) return;
     
     if ([keyPath isEqualToString:@"tintColor"]) {
         [self _hideOriginalAndAddOpaqueBackgroundOnUIBar:object];
