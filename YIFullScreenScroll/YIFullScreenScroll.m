@@ -226,8 +226,8 @@
     opaqueBarImageView.opaque = YES;
     opaqueBarImageView.frame = originalBackground.frame;
     
-    // NOTE: UIViewAutoresizingFlexibleHeight is required when tintColored & rotated
-    opaqueBarImageView.autoresizingMask = originalBackground.autoresizingMask | UIViewAutoresizingFlexibleHeight;
+    // NOTE: auto-resize when tintColored & rotated
+    opaqueBarImageView.autoresizingMask = originalBackground.autoresizingMask | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     if (bar == self.navigationBar) {
         self.navigationBar.translucent = YES;
