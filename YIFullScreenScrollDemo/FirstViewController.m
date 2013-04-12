@@ -102,7 +102,7 @@
 
 - (IBAction)handleTintColorButton:(id)sender
 {
-    UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:1 brightness:1 alpha:1];
+    UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:0.8 brightness:0.8 alpha:1];
     
     self.navigationController.navigationBar.tintColor = randomColor;
     self.navigationController.toolbar.tintColor = randomColor;
