@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1F000B0A157BAA7900B3F920 /* UIView+YIFullScreenScroll.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F000B08157BAA7900B3F920 /* UIView+YIFullScreenScroll.m */; };
+		481CF1AC171BF0C900B83CE2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */; };
 		489EDE7A1578B435001206A5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE791578B435001206A5 /* UIKit.framework */; };
 		489EDE7C1578B435001206A5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE7B1578B435001206A5 /* Foundation.framework */; };
 		489EDE7E1578B435001206A5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE7D1578B435001206A5 /* CoreGraphics.framework */; };
@@ -21,12 +21,12 @@
 		489EDE971578B436001206A5 /* SecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 489EDE961578B436001206A5 /* SecondViewController.m */; };
 		489EDE991578B436001206A5 /* second.png in Resources */ = {isa = PBXBuildFile; fileRef = 489EDE981578B436001206A5 /* second.png */; };
 		489EDE9B1578B436001206A5 /* second@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 489EDE9A1578B436001206A5 /* second@2x.png */; };
-		489EDEA71578B6D5001206A5 /* YIFullScreenScroll.m in Sources */ = {isa = PBXBuildFile; fileRef = 489EDEA61578B6D5001206A5 /* YIFullScreenScroll.m */; };
+		5183F26332D340F7B76268DA /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B57D9CC7F864504B1072C13 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1F000B08157BAA7900B3F920 /* UIView+YIFullScreenScroll.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+YIFullScreenScroll.m"; sourceTree = "<group>"; };
-		1F000B09157BAA7900B3F920 /* UIView+YIFullScreenScroll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+YIFullScreenScroll.h"; sourceTree = "<group>"; };
+		1B57D9CC7F864504B1072C13 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		48965F2C1578B8C2005A393A /* Defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Defines.h; sourceTree = "<group>"; };
 		489EDE751578B435001206A5 /* YIFullScreenScrollDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YIFullScreenScrollDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		489EDE791578B435001206A5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -47,8 +47,7 @@
 		489EDE961578B436001206A5 /* SecondViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SecondViewController.m; sourceTree = "<group>"; };
 		489EDE981578B436001206A5 /* second.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = second.png; sourceTree = "<group>"; };
 		489EDE9A1578B436001206A5 /* second@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "second@2x.png"; sourceTree = "<group>"; };
-		489EDEA51578B6D5001206A5 /* YIFullScreenScroll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YIFullScreenScroll.h; sourceTree = "<group>"; };
-		489EDEA61578B6D5001206A5 /* YIFullScreenScroll.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YIFullScreenScroll.m; sourceTree = "<group>"; };
+		DE98F8AC5A0549E19C653566 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +58,7 @@
 				489EDE7A1578B435001206A5 /* UIKit.framework in Frameworks */,
 				489EDE7C1578B435001206A5 /* Foundation.framework in Frameworks */,
 				489EDE7E1578B435001206A5 /* CoreGraphics.framework in Frameworks */,
+				5183F26332D340F7B76268DA /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,10 +68,10 @@
 		489EDE6A1578B435001206A5 = {
 			isa = PBXGroup;
 			children = (
-				489EDEA41578B6BB001206A5 /* YIFullScreenScroll */,
 				489EDE7F1578B435001206A5 /* YIFullScreenScrollDemo */,
 				489EDE781578B435001206A5 /* Frameworks */,
 				489EDE761578B435001206A5 /* Products */,
+				DE98F8AC5A0549E19C653566 /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -89,6 +89,7 @@
 				489EDE791578B435001206A5 /* UIKit.framework */,
 				489EDE7B1578B435001206A5 /* Foundation.framework */,
 				489EDE7D1578B435001206A5 /* CoreGraphics.framework */,
+				1B57D9CC7F864504B1072C13 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -116,23 +117,13 @@
 		489EDE801578B435001206A5 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */,
 				489EDE811578B435001206A5 /* YIFullScreenScrollDemo-Info.plist */,
 				489EDE821578B435001206A5 /* InfoPlist.strings */,
 				489EDE851578B436001206A5 /* main.m */,
 				489EDE871578B436001206A5 /* YIFullScreenScrollDemo-Prefix.pch */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		489EDEA41578B6BB001206A5 /* YIFullScreenScroll */ = {
-			isa = PBXGroup;
-			children = (
-				489EDEA51578B6D5001206A5 /* YIFullScreenScroll.h */,
-				489EDEA61578B6D5001206A5 /* YIFullScreenScroll.m */,
-				1F000B09157BAA7900B3F920 /* UIView+YIFullScreenScroll.h */,
-				1F000B08157BAA7900B3F920 /* UIView+YIFullScreenScroll.m */,
-			);
-			path = YIFullScreenScroll;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -142,9 +133,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 489EDE9E1578B436001206A5 /* Build configuration list for PBXNativeTarget "YIFullScreenScrollDemo" */;
 			buildPhases = (
+				3ED03E5F8AAE4BE2B0FA7A95 /* Check Pods Manifest.lock */,
 				489EDE711578B435001206A5 /* Sources */,
 				489EDE721578B435001206A5 /* Frameworks */,
 				489EDE731578B435001206A5 /* Resources */,
+				CD9C082446054108901EFCA1 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -161,7 +154,7 @@
 		489EDE6C1578B435001206A5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Yasuhiro Inami";
 			};
 			buildConfigurationList = 489EDE6F1578B435001206A5 /* Build configuration list for PBXProject "YIFullScreenScrollDemo" */;
@@ -192,10 +185,42 @@
 				489EDE941578B436001206A5 /* first@2x.png in Resources */,
 				489EDE991578B436001206A5 /* second.png in Resources */,
 				489EDE9B1578B436001206A5 /* second@2x.png in Resources */,
+				481CF1AC171BF0C900B83CE2 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3ED03E5F8AAE4BE2B0FA7A95 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sanbox is not in sync with the Podfile.lock. Run 'pod install'.\nEOM\n    exit 1\nfi\n";
+		};
+		CD9C082446054108901EFCA1 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		489EDE711578B435001206A5 /* Sources */ = {
@@ -206,8 +231,6 @@
 				489EDE8A1578B436001206A5 /* AppDelegate.m in Sources */,
 				489EDE901578B436001206A5 /* FirstViewController.m in Sources */,
 				489EDE971578B436001206A5 /* SecondViewController.m in Sources */,
-				489EDEA71578B6D5001206A5 /* YIFullScreenScroll.m in Sources */,
-				1F000B0A157BAA7900B3F920 /* UIView+YIFullScreenScroll.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +262,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -264,6 +291,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -280,6 +311,7 @@
 		};
 		489EDE9F1578B436001206A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DE98F8AC5A0549E19C653566 /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "YIFullScreenScrollDemo/YIFullScreenScrollDemo-Prefix.pch";
@@ -291,6 +323,7 @@
 		};
 		489EDEA01578B436001206A5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DE98F8AC5A0549E19C653566 /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "YIFullScreenScrollDemo/YIFullScreenScrollDemo-Prefix.pch";
