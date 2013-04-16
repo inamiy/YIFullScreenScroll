@@ -51,6 +51,17 @@
 @protocol YIFullScreenScrollDelegate <NSObject>
 
 @optional
+
+//
+// Use this method to layout your custom views after
+// default UI-bars (navigationBar/toolbar/tabBar) are set.
+//
+// NOTE:
+// This method is different from UIScrollViewDelegate's '-scrollViewDidScroll:'
+// which will be called on next run-loop after contentOffset is observed & layout is triggered.
+// This means that default UI-bars & your custom views may not layout synchronously
+// if you use '-scrollViewDidScroll:'.
+//
 - (void)fullScreenScrollDidLayoutUIBars:(YIFullScreenScroll*)fullScreenScroll;
 
 @end
