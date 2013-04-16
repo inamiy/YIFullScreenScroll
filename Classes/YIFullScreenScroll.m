@@ -277,16 +277,24 @@ static char __fullScreenScrollContext;
     
     UIScrollView* scrollView = self.scrollView;
     
+    // return if contentSize.height is not enough
+    if (scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
+        
+        return;
+    }
+    
     if (!self.isShowingUIBars) {
         
         CGFloat offsetY = scrollView.contentOffset.y-self.contentOffsetYToStartHiding;
+        
+        CGFloat maxOffsetY = scrollView.contentSize.height-scrollView.frame.size.height;
         
         //
         // Don't let UI-bars appear when:
         // 1. scroll reaches to bottom
         // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (until offfset.y reaches top)
         //
-        if (offsetY+scrollView.frame.size.height > scrollView.contentSize.height ||
+        if ((maxOffsetY > 0 && offsetY > maxOffsetY) ||
             (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && offsetY > 0)) {
             
             deltaY = fabs(deltaY);
