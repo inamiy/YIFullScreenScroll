@@ -32,6 +32,8 @@
 @property (nonatomic) BOOL shouldHideToolbarOnScroll;       // default = YES
 @property (nonatomic) BOOL shouldHideTabBarOnScroll;        // default = YES
 
+@property (nonatomic) CGFloat contentOffsetYToStartHiding;  // default = 0.0
+
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView;
 

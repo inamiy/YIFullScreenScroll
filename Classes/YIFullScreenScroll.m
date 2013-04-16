@@ -278,18 +278,21 @@ static char __fullScreenScrollContext;
     UIScrollView* scrollView = self.scrollView;
     
     if (!self.isShowingUIBars) {
+        
+        CGFloat offsetY = scrollView.contentOffset.y-self.contentOffsetYToStartHiding;
+        
         //
         // Don't let UI-bars appear when:
         // 1. scroll reaches to bottom
         // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (until offfset.y reaches top)
         //
-        if (scrollView.contentOffset.y+scrollView.frame.size.height > scrollView.contentSize.height ||
-            (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && scrollView.contentOffset.y > 0)) {
+        if (offsetY+scrollView.frame.size.height > scrollView.contentSize.height ||
+            (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && offsetY > 0)) {
             
             deltaY = fabs(deltaY);
         }
         // always set negative when scrolling up too high
-        else if (scrollView.contentOffset.y <= -scrollView.contentInset.top) {
+        else if (offsetY <= -scrollView.contentInset.top) {
             
             deltaY = -fabs(deltaY);
         }
@@ -297,10 +300,12 @@ static char __fullScreenScrollContext;
         deltaY = MIN(deltaY, MAX_SHIFT_PER_SCROLL);
         
         // NOTE: don't limit deltaY in case of navBar being partially hidden & scrolled-up very fast
-        if (scrollView.contentOffset.y > 0) {
+        if (offsetY > 0) {
             deltaY = MAX(deltaY, -MAX_SHIFT_PER_SCROLL);
         }
     }
+    
+    if (deltaY == 0.0) return;
     
     // navbar
     UINavigationBar* navBar = self.navigationBar;

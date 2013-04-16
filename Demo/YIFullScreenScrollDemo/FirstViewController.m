@@ -39,6 +39,8 @@
 //    self.fullScreenScroll.shouldHideToolbarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;
     
+//    self.fullScreenScroll.contentOffsetYToStartHiding = 100;
+    
     // pulldown dummy view
     // TODO: avoid navBar-translucency when rotating
     UIView *pulldownDummyView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, self.view.frame.size.width, self.tableView.bounds.size.height)];
