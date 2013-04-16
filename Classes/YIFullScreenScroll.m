@@ -75,7 +75,7 @@ static char __fullScreenScrollContext;
         
         [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
         
-        self.enabled = YES;
+        _enabled = YES;
         
     }
     return self;
