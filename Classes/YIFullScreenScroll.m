@@ -352,6 +352,10 @@ static char __fullScreenScrollContext;
     }
     scrollView.scrollIndicatorInsets = insets;
     
+    if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
+        [_delegate fullScreenScrollDidLayoutUIBars:self];
+    }
+    
 }
 
 - (void)_layoutContainerViewExpanding:(BOOL)expanding

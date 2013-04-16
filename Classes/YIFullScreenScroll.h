@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "UIViewController+YIFullScreenScroll.h"
 
+@protocol YIFullScreenScrollDelegate;
+
 //
 // NOTE:
 // YIFullScreenScroll forces viewController.navigationController's navigationBar/toolbar
@@ -16,6 +18,8 @@
 // and sets custom background imageView to make it opaque again.
 //
 @interface YIFullScreenScroll : NSObject
+
+@property (nonatomic, weak) id <YIFullScreenScrollDelegate> delegate;
 
 @property (nonatomic, weak) UIViewController* viewController;
 @property (nonatomic, weak) UIScrollView* scrollView;
@@ -38,5 +42,13 @@
 - (void)viewDidAppear:(BOOL)animated;
 - (void)viewWillDisappear:(BOOL)animated;
 - (void)viewDidDisappear:(BOOL)animated;
+
+@end
+
+
+@protocol YIFullScreenScrollDelegate <NSObject>
+
+@optional
+- (void)fullScreenScrollDidLayoutUIBars:(YIFullScreenScroll*)fullScreenScroll;
 
 @end
