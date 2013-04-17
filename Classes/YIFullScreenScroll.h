@@ -28,6 +28,9 @@
 
 @property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;      // default = YES
 
+// this property controls hiding UI-bars via UIWebView's JavaScript calling window.scrollTo(0,1))
+@property (nonatomic) BOOL shouldHideUIBarsWhenNotDragging; // default = YES
+
 @property (nonatomic) BOOL shouldHideNavigationBarOnScroll; // default = YES
 @property (nonatomic) BOOL shouldHideToolbarOnScroll;       // default = YES
 @property (nonatomic) BOOL shouldHideTabBarOnScroll;        // default = YES

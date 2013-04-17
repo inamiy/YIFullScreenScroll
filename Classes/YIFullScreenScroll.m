@@ -125,8 +125,10 @@ static char __fullScreenScrollContext;
     
     if (self.enabled) {
         [self _setupUIBarBackgrounds];
-        [self showUIBarsAnimated:NO];
     }
+    
+    // always show, regardless of _enabled
+    [self showUIBarsAnimated:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -211,6 +213,16 @@ static char __fullScreenScrollContext;
             
             CGFloat deltaY = newPoint.y - oldPoint.y;
             
+            //
+            // Disable hiding when not dragging.
+            // (e.g. UIWebView's JavaScript calling window.scrollTo(0,1))
+            //
+            // But by checking deltaY > 0, UI-bars can be shown when scrolls to top.
+            //
+            if (!self.shouldHideUIBarsWhenNotDragging && !self.scrollView.isDragging && deltaY > 0) {
+                return;
+            }
+            
             [self _layoutUIBarsWithDeltaY:deltaY];
             
         }
@@ -272,14 +284,14 @@ static char __fullScreenScrollContext;
 
 - (void)_layoutUIBarsWithDeltaY:(CGFloat)deltaY
 {
-    if (!self.enabled) return;
     if (deltaY == 0.0) return;
     
     UIScrollView* scrollView = self.scrollView;
     
     // return if contentSize.height is not enough
-    if (scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
-        
+    // (should skip when _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
+    if (self.isViewVisible && scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
+          
         return;
     }
     
