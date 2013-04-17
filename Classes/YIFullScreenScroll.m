@@ -35,7 +35,7 @@ static char __fullScreenScrollContext;
     UIImageView*        _customNavBarBackground;
     UIImageView*        _customToolbarBackground;
     
-    UIEdgeInsets        _scrollIndicatorInsetsOnInit;
+    UIEdgeInsets        _defaultScrollIndicatorInsets;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
@@ -63,7 +63,6 @@ static char __fullScreenScrollContext;
     if (self) {
         
         _viewController = viewController;
-        _scrollView = scrollView;
         _ignoresTranslucent = ignoresTranslucent;
         
         _shouldShowUIBarsOnScrollUp = YES;
@@ -71,11 +70,9 @@ static char __fullScreenScrollContext;
         _shouldHideToolbarOnScroll = YES;
         _shouldHideTabBarOnScroll = YES;
         
-        _scrollIndicatorInsetsOnInit = scrollView.scrollIndicatorInsets;
+        _enabled = YES; // don't call self.enabled = YES
         
-        [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
-        
-        _enabled = YES;
+        self.scrollView = scrollView;
         
     }
     return self;
@@ -83,14 +80,35 @@ static char __fullScreenScrollContext;
 
 - (void)dealloc
 {
-    [self.scrollView removeObserver:self forKeyPath:@"contentOffset" context:&__fullScreenScrollContext];
-    
-    self.enabled = NO;
+    if (self.isViewVisible) {
+        self.enabled = NO;
+    }
+
+    self.scrollView = nil;
 }
 
 #pragma mark -
 
 #pragma mark Accessors
+
+- (void)setScrollView:(UIScrollView *)scrollView
+{
+    if (scrollView != _scrollView) {
+        
+        if (_scrollView) {
+            [_scrollView removeObserver:self forKeyPath:@"contentOffset" context:&__fullScreenScrollContext];
+        }
+        
+        _scrollView = scrollView;
+        
+        if (_scrollView) {
+            [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
+
+            _defaultScrollIndicatorInsets = _scrollView.scrollIndicatorInsets;
+        }
+        
+    }
+}
 
 - (void)setEnabled:(BOOL)enabled
 {
@@ -146,9 +164,11 @@ static char __fullScreenScrollContext;
     self.isViewVisible = NO;
     
     if (self.enabled) {
-//        [self showUIBarsAnimated:NO]; // moved to viewWillAppear
         [self _teardownUIBarBackgrounds];
     }
+    
+    // always show, regardless of _enabled
+    [self showUIBarsAnimated:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -364,18 +384,20 @@ static char __fullScreenScrollContext;
     }
     
     // scrollIndicatorInsets
-    UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
-    if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-        insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
+    if (self.enabled) {
+        UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
+        if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
+            insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
+        }
+        insets.bottom = 0;
+        if (isToolbarExisting && _shouldHideToolbarOnScroll) {
+            insets.bottom += toolbarSuperviewHeight-toolbar.top;
+        }
+        if (isTabBarExisting && _shouldHideTabBarOnScroll) {
+            insets.bottom += tabBarSuperviewHeight-tabBar.top;
+        }
+        scrollView.scrollIndicatorInsets = insets;
     }
-    insets.bottom = 0;
-    if (isToolbarExisting && _shouldHideToolbarOnScroll) {
-        insets.bottom += toolbarSuperviewHeight-toolbar.top;
-    }
-    if (isTabBarExisting && _shouldHideTabBarOnScroll) {
-        insets.bottom += tabBarSuperviewHeight-tabBar.top;
-    }
-    scrollView.scrollIndicatorInsets = insets;
     
     if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
         [_delegate fullScreenScrollDidLayoutUIBars:self];
@@ -408,7 +430,7 @@ static char __fullScreenScrollContext;
             tabBarTransitionView.frame = frame;
             
             // scrollIndicatorInsets will be modified when tabBarTransitionView shrinks, so reset it here.
-            _scrollView.scrollIndicatorInsets = _scrollIndicatorInsetsOnInit;
+            _scrollView.scrollIndicatorInsets = _defaultScrollIndicatorInsets;
         }
     }
     
