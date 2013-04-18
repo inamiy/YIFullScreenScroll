@@ -347,8 +347,8 @@ static char __fullScreenScrollContext;
     
     if (deltaY == 0.0) return;
     
-    // return if user hasn't touched but trying to hide UI-bars (e.g. orientation change)
-    if (deltaY > 0 && !self.scrollView.isTracking) return;
+    // return if user hasn't dragged but trying to hide UI-bars (e.g. orientation change)
+    if (deltaY > 0 && !self.scrollView.isDragging) return;
     
     // navbar
     UINavigationBar* navBar = self.navigationBar;
