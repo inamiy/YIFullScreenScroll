@@ -384,7 +384,7 @@ static char __fullScreenScrollContext;
     }
     
     // scrollIndicatorInsets
-    if (self.enabled) {
+    if (self.enabled && self.isViewVisible) {
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
             insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
