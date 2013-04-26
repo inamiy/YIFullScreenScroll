@@ -164,6 +164,9 @@ static char __fullScreenScrollContext;
 {
     self.isViewVisible = NO;
     
+    // don't teardown & show UIBars if presenting modalViewController
+    if (_viewController.presentedViewController) return;
+    
     if (self.enabled) {
         [self _teardownUIBarBackgrounds];
     }
@@ -542,6 +545,7 @@ static char __fullScreenScrollContext;
     }
 }
 
+// removes old & add new custom background for UINavigationBar/UIToolbar
 - (void)_addCustomBackgroundOnUIBar:(UIView*)bar
 {
     if (!bar) return;
