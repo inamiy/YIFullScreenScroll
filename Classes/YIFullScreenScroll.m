@@ -122,6 +122,7 @@ static char __fullScreenScrollContext;
             _enabled = YES;
         }
         else {
+            // show before setting _enabled=NO
             [self showUIBarsAnimated:NO];
             
             // set NO before teardown starts so that observing contentOffset will be safely handled
@@ -182,6 +183,8 @@ static char __fullScreenScrollContext;
 
 - (void)showUIBarsAnimated:(BOOL)animated
 {
+    if (!self.enabled) return;
+    
     self.isShowingUIBars = YES;
     
     if (animated) {
@@ -304,6 +307,7 @@ static char __fullScreenScrollContext;
 
 - (void)_layoutUIBarsWithDeltaY:(CGFloat)deltaY
 {
+    if (!self.enabled) return;
     if (deltaY == 0.0) return;
     
     UIScrollView* scrollView = self.scrollView;
@@ -386,8 +390,9 @@ static char __fullScreenScrollContext;
         tabBar.top = MIN(MAX(tabBar.top+deltaY, tabBarSuperviewHeight-tabBar.height), tabBarSuperviewHeight);
     }
     
-    // scrollIndicatorInsets
     if (self.enabled && self.isViewVisible) {
+        
+        // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
             insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
@@ -400,12 +405,12 @@ static char __fullScreenScrollContext;
             insets.bottom += tabBarSuperviewHeight-tabBar.top;
         }
         scrollView.scrollIndicatorInsets = insets;
+        
+        // delegation
+        if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
+            [_delegate fullScreenScrollDidLayoutUIBars:self];
+        }
     }
-    
-    if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
-        [_delegate fullScreenScrollDidLayoutUIBars:self];
-    }
-    
 }
 
 - (void)_layoutContainerViewExpanding:(BOOL)expanding
