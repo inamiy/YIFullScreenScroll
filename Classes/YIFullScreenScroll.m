@@ -142,12 +142,17 @@ static char __fullScreenScrollContext;
 {
     self.isViewVisible = NO;
     
-    if (self.enabled) {
-        [self _setupUIBarBackgrounds];
+    // don't setup & show UIBars if dismissing modalViewController
+    if (!_viewController.presentedViewController) {
+        
+        if (self.enabled) {
+            [self _setupUIBarBackgrounds];
+        }
+        
+        // always show, regardless of _enabled
+        [self showUIBarsAnimated:NO];
+        
     }
-    
-    // always show, regardless of _enabled
-    [self showUIBarsAnimated:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -165,14 +170,16 @@ static char __fullScreenScrollContext;
     self.isViewVisible = NO;
     
     // don't teardown & show UIBars if presenting modalViewController
-    if (_viewController.presentedViewController) return;
-    
-    if (self.enabled) {
-        [self _teardownUIBarBackgrounds];
+    if (!_viewController.presentedViewController) {
+        
+        if (self.enabled) {
+            [self _teardownUIBarBackgrounds];
+        }
+        
+        // always show, regardless of _enabled
+        [self showUIBarsAnimated:NO];
+        
     }
-    
-    // always show, regardless of _enabled
-    [self showUIBarsAnimated:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
