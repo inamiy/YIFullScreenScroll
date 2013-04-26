@@ -41,6 +41,7 @@
                   scrollView:(UIScrollView*)scrollView;
 
 - (void)showUIBarsAnimated:(BOOL)animated;
+- (void)showUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 
 // used in UIViewController+YIFullScreenScroll
 - (void)viewWillAppear:(BOOL)animated;

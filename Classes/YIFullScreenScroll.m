@@ -183,6 +183,11 @@ static char __fullScreenScrollContext;
 
 - (void)showUIBarsAnimated:(BOOL)animated
 {
+    [self showUIBarsAnimated:animated completion:NULL];
+}
+
+- (void)showUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
+{
     if (!self.enabled) return;
     
     self.isShowingUIBars = YES;
@@ -199,6 +204,10 @@ static char __fullScreenScrollContext;
         } completion:^(BOOL finished) {
             
             weakSelf.isShowingUIBars = NO;
+            
+            if (completion) {
+                completion(finished);
+            }
             
         }];
     }
