@@ -8,7 +8,7 @@
         <!--First View Controller - Root View Controller-->
         <scene sceneID="Nop-Yf-xa5">
             <objects>
-                <tableViewController id="k5w-hA-6kN" customClass="FirstViewController" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="" id="k5w-hA-6kN" customClass="FirstViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="h93-Oh-v47">
                         <rect key="frame" x="0.0" y="64" width="320" height="367"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -95,7 +95,7 @@
         <!--Navigation Controller - Item-->
         <scene sceneID="ZJR-2b-GC2">
             <objects>
-                <navigationController definesPresentationContext="YES" id="X9W-b2-41B" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="NavigationController" definesPresentationContext="YES" id="X9W-b2-41B" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Item" id="L0X-WD-x60"/>
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="vlJ-S3-3xp">
                         <autoresizingMask key="autoresizingMask"/>
@@ -180,6 +180,8 @@
         <class className="FirstViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/FirstViewController.h"/>
             <relationships>
+                <relationship kind="action" name="handleModalDismissButton:"/>
+                <relationship kind="action" name="handleModalPresentButton:"/>
                 <relationship kind="action" name="handleTintColorButton:"/>
                 <relationship kind="action" name="handleToggleButton:"/>
             </relationships>

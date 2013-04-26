@@ -90,8 +90,24 @@
     self.fullScreenScroll.enabled = !self.fullScreenScroll.enabled;
 }
 
+- (IBAction)handleModalPresentButton:(id)sender
+{
+    UIBarButtonItem* modalCloseItem = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(handleModalDismissButton:)];
+    
+    UINavigationController* modalNavC = [self.storyboard instantiateViewControllerWithIdentifier:@"NavigationController"];
+    modalNavC.topViewController.navigationItem.leftBarButtonItem = modalCloseItem;
+    [self presentViewController:modalNavC animated:YES completion:NULL];
+}
+
+- (IBAction)handleModalDismissButton:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
 - (IBAction)handleTintColorButton:(id)sender
 {
+    
+    
     UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:0.8 brightness:0.8 alpha:1];
     
     self.navigationController.navigationBar.tintColor = randomColor;
@@ -102,11 +118,15 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if (section == 0) {
+        return 1;
+    }
+    
     return 50;
 }
 
@@ -114,6 +134,11 @@
 {
     static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    if (indexPath.section == 0) {
+        cell.textLabel.text = @"Show in Modal";
+        return cell;
+    }
     
     // Configure the cell...
     cell.textLabel.text = [NSString stringWithFormat:@"Cell %d-%d",indexPath.section,indexPath.row];
@@ -164,9 +189,33 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (indexPath.section == 0) {
+        [self handleModalPresentButton:nil];
+        return;
+    }
+    
     [self.fullScreenScroll showUIBarsAnimated:YES];
     
     [self handleTintColorButton:nil];
 }
+
+//
+// WARNING:
+// Don't use UITableView's titleForHeader/FooterInSection when using YIFullScreenScroll,
+// since this library's core concept is to initially expand scrollView's frame
+// till navigationBar/toolbar's frames by force-setting translucent=YES.
+// 
+// See also:
+// The first section is under navigation bar,when tableview have sections.:
+// https://github.com/inamiy/YIFullScreenScroll/issues/3
+//
+//- (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+//{
+//    if (section == 0) {
+//        return @"Show in Modal";
+//    }
+//    
+//    return @"Tints Color";
+//}
 
 @end
