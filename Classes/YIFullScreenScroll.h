@@ -22,7 +22,7 @@
 @property (nonatomic, weak) id <YIFullScreenScrollDelegate> delegate;
 
 @property (nonatomic, weak) UIViewController* viewController;
-@property (nonatomic, weak) UIScrollView* scrollView;
+@property (nonatomic, strong) UIScrollView* scrollView;
 
 @property (nonatomic) BOOL enabled; // default = YES
 
