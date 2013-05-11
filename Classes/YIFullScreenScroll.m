@@ -97,13 +97,29 @@ static char __fullScreenScrollContext;
         
         if (_scrollView) {
             [_scrollView removeObserver:self forKeyPath:@"contentOffset" context:&__fullScreenScrollContext];
+            
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
         }
         
         _scrollView = scrollView;
         
         if (_scrollView) {
             [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
-
+            
+            //
+            // observe willEnterForeground/didChangeStatusBarOrientation to properly set both navBar & tabBar
+            // (fixes https://github.com/inamiy/YIFullScreenScroll/issues/5)
+            //
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(onWillEnterForegroundNotification:)
+                                                         name:UIApplicationWillEnterForegroundNotification
+                                                       object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(onDidChangeStatusBarOrientationNotification:)
+                                                         name:UIApplicationDidChangeStatusBarOrientationNotification
+                                                       object:nil];
+            
             _defaultScrollIndicatorInsets = _scrollView.scrollIndicatorInsets;
         }
         
@@ -270,6 +286,18 @@ static char __fullScreenScrollContext;
         }
         
     }
+}
+
+#pragma mark Notifications
+
+- (void)onWillEnterForegroundNotification:(NSNotification*)notification
+{
+    [self showUIBarsAnimated:NO];
+}
+
+- (void)onDidChangeStatusBarOrientationNotification:(NSNotification*)notification
+{
+    [self showUIBarsAnimated:NO];
 }
 
 #pragma mark -
