@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		481CF1AC171BF0C900B83CE2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */; };
+		486BF31717407E0C00660EE4 /* FirstDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 486BF31617407E0C00660EE4 /* FirstDetailViewController.m */; };
 		489EDE7A1578B435001206A5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE791578B435001206A5 /* UIKit.framework */; };
 		489EDE7C1578B435001206A5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE7B1578B435001206A5 /* Foundation.framework */; };
 		489EDE7E1578B435001206A5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE7D1578B435001206A5 /* CoreGraphics.framework */; };
@@ -27,6 +28,8 @@
 /* Begin PBXFileReference section */
 		1B57D9CC7F864504B1072C13 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		486BF31517407E0C00660EE4 /* FirstDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FirstDetailViewController.h; sourceTree = "<group>"; };
+		486BF31617407E0C00660EE4 /* FirstDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FirstDetailViewController.m; sourceTree = "<group>"; };
 		48965F2C1578B8C2005A393A /* Defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Defines.h; sourceTree = "<group>"; };
 		489EDE751578B435001206A5 /* YIFullScreenScrollDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YIFullScreenScrollDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		489EDE791578B435001206A5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -103,6 +106,8 @@
 				489EDE8B1578B436001206A5 /* MainStoryboard.storyboard */,
 				489EDE8E1578B436001206A5 /* FirstViewController.h */,
 				489EDE8F1578B436001206A5 /* FirstViewController.m */,
+				486BF31517407E0C00660EE4 /* FirstDetailViewController.h */,
+				486BF31617407E0C00660EE4 /* FirstDetailViewController.m */,
 				489EDE911578B436001206A5 /* first.png */,
 				489EDE931578B436001206A5 /* first@2x.png */,
 				489EDE951578B436001206A5 /* SecondViewController.h */,
@@ -231,6 +236,7 @@
 				489EDE8A1578B436001206A5 /* AppDelegate.m in Sources */,
 				489EDE901578B436001206A5 /* FirstViewController.m in Sources */,
 				489EDE971578B436001206A5 /* SecondViewController.m in Sources */,
+				486BF31717407E0C00660EE4 /* FirstDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

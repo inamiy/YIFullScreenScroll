@@ -135,10 +135,10 @@
     static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    if (indexPath.section == 0) {
-        cell.textLabel.text = @"Show in Modal";
-        return cell;
-    }
+//    if (indexPath.section == 0) {
+//        cell.textLabel.text = @"Show in Modal";
+//        return cell;
+//    }
     
     // Configure the cell...
     cell.textLabel.text = [NSString stringWithFormat:@"Cell %d-%d",indexPath.section,indexPath.row];
@@ -187,17 +187,17 @@
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (indexPath.section == 0) {
-        [self handleModalPresentButton:nil];
-        return;
-    }
-    
-    [self.fullScreenScroll showUIBarsAnimated:YES];
-    
-    [self handleTintColorButton:nil];
-}
+//- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    if (indexPath.section == 0) {
+//        [self handleModalPresentButton:nil];
+//        return;
+//    }
+//    
+//    [self.fullScreenScroll showUIBarsAnimated:YES];
+//    
+//    [self handleTintColorButton:nil];
+//}
 
 //
 // WARNING:
