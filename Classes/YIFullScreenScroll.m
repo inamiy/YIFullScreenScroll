@@ -354,14 +354,14 @@ static char __fullScreenScrollContext;
     
     UIScrollView* scrollView = self.scrollView;
     
-    // return if contentSize.height is not enough
-    // (should skip when _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
-    if (self.isViewVisible && scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
-          
-        return;
-    }
-    
     if (!self.isShowingUIBars) {
+        
+        // return if contentSize.height is not enough
+        // (should skip when _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
+        if (self.isViewVisible && scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
+            
+            return;
+        }
         
         CGFloat offsetY = scrollView.contentOffset.y-self.contentOffsetYToStartHiding;
         
