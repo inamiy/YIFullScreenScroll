@@ -49,6 +49,10 @@ static const char __fullScreenScrollKey;
     [UIViewController jr_swizzleMethod:@selector(viewDidDisappear:)
                             withMethod:@selector(YIFullScreenScroll_viewDidDisappear:)
                                  error:NULL];
+    
+    [UIViewController jr_swizzleMethod:@selector(willRotateToInterfaceOrientation:duration:)
+                            withMethod:@selector(YIFullScreenScroll_willRotateToInterfaceOrientation:duration:)
+                                 error:NULL];
 }
 
 - (void)YIFullScreenScroll_viewWillAppear:(BOOL)animated
@@ -73,6 +77,12 @@ static const char __fullScreenScrollKey;
 {
     [self YIFullScreenScroll_viewDidDisappear:animated];
     [self.fullScreenScroll viewDidDisappear:animated];
+}
+
+- (void)YIFullScreenScroll_willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [self YIFullScreenScroll_willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    [self.fullScreenScroll willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
 }
 
 @end
