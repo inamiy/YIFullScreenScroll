@@ -28,9 +28,8 @@ static char __fullScreenScrollContext;
 
 @implementation YIFullScreenScroll
 {
-    UINavigationBar*    _navigationBar;
-    UIToolbar*          _toolbar;
-    UITabBar*           _tabBar;
+    __weak UINavigationController* _navigationController;
+    __weak UITabBarController*     _tabBarController;
     
     UIImageView*        _customNavBarBackground;
     UIImageView*        _customToolbarBackground;
@@ -299,40 +298,51 @@ static char __fullScreenScrollContext;
 
 #pragma mark UIBars
 
+- (UINavigationController*)navigationController
+{
+    if (!_navigationController) {
+        _navigationController = _viewController.navigationController;
+    }
+    return _navigationController;
+}
+
+//
+// NOTE: weakly referencing tabBarController is important to safely reset its size on viewDidDisappear
+// (fixes https://github.com/inamiy/YIFullScreenScroll/issues/7#issuecomment-17991653)
+//
+- (UITabBarController*)tabBarController
+{
+    if (!_tabBarController) {
+        _tabBarController = _viewController.tabBarController;
+    }
+    return _tabBarController;
+}
+
 - (UINavigationBar*)navigationBar
 {
-    if (!_navigationBar) {
-        _navigationBar = _viewController.navigationController.navigationBar;
-    }
-    return _navigationBar;
+    return self.navigationController.navigationBar;
 }
 
 - (UIToolbar*)toolbar
 {
-    if (!_toolbar) {
-        _toolbar = _viewController.navigationController.toolbar;
-    }
-    return _toolbar;
+    return self.navigationController.toolbar;
 }
 
 - (UITabBar*)tabBar
 {
-    if (!_tabBar) {
-        _tabBar = _viewController.tabBarController.tabBar;
-    }
-    return _tabBar;
+    return self.tabBarController.tabBar;
 }
 
 - (BOOL)isNavigationBarExisting
 {
     UINavigationBar* navBar = self.navigationBar;
-    return navBar && navBar.superview && !navBar.hidden && !_viewController.navigationController.navigationBarHidden;
+    return navBar && navBar.superview && !navBar.hidden && !self.navigationController.navigationBarHidden;
 }
 
 - (BOOL)isToolbarExisting
 {
     UIToolbar* toolbar = self.toolbar;
-    return toolbar && toolbar.superview && !toolbar.hidden && !_viewController.navigationController.toolbarHidden;
+    return toolbar && toolbar.superview && !toolbar.hidden && !self.navigationController.toolbarHidden;
 }
 
 - (BOOL)isTabBarExisting
@@ -459,23 +469,23 @@ static char __fullScreenScrollContext;
 {
     // toolbar (iOS5 fix which doesn't re-layout when translucent is set)
     if (_shouldHideToolbarOnScroll && self.isToolbarExisting) {
-        BOOL toolbarHidden = _viewController.navigationController.toolbarHidden;
-        [_viewController.navigationController setToolbarHidden:!toolbarHidden];
-        [_viewController.navigationController setToolbarHidden:toolbarHidden];
+        BOOL toolbarHidden = self.navigationController.toolbarHidden;
+        [self.navigationController setToolbarHidden:!toolbarHidden];
+        [self.navigationController setToolbarHidden:toolbarHidden];
     }
     
     // tabBar
     if (_shouldHideTabBarOnScroll && self.isTabBarExisting) {
         
-        UIView* tabBarTransitionView = [_viewController.tabBarController.view.subviews objectAtIndex:0];
+        UIView* tabBarTransitionView = [self.tabBarController.view.subviews objectAtIndex:0];
         
         if (expanding) {
-            tabBarTransitionView.frame = _viewController.tabBarController.view.bounds;
+            tabBarTransitionView.frame = self.tabBarController.view.bounds;
         }
         else {
             UITabBar* tabBar = self.tabBar;
             
-            CGRect frame = _viewController.tabBarController.view.bounds;
+            CGRect frame = self.tabBarController.view.bounds;
             frame.size.height -= tabBar.height;
             tabBarTransitionView.frame = frame;
             
@@ -492,7 +502,7 @@ static char __fullScreenScrollContext;
 
 - (void)_setupUIBarBackgrounds
 {
-    if (_viewController.navigationController) {
+    if (self.navigationController) {
         
         UINavigationBar* navBar = self.navigationBar;
         UIToolbar* toolbar = self.toolbar;
@@ -554,9 +564,6 @@ static char __fullScreenScrollContext;
     
     self.navigationBar.translucent = NO;
     self.toolbar.translucent = NO;
-    
-    _navigationBar = nil;
-    _toolbar = nil;
 }
 
 - (BOOL)_hasCustomBackgroundOnUIBar:(UIView*)bar
@@ -588,9 +595,9 @@ static char __fullScreenScrollContext;
         self.navigationBar.translucent = NO;
         
         // temporarilly show navigationBar to copy backgroundImage safely
-        isUIBarHidden = _viewController.navigationController.navigationBarHidden;
+        isUIBarHidden = self.navigationController.navigationBarHidden;
         if (isUIBarHidden) {
-            [_viewController.navigationController setNavigationBarHidden:NO];
+            [self.navigationController setNavigationBarHidden:NO];
         }
     }
     else if (bar == self.toolbar) {
@@ -598,9 +605,9 @@ static char __fullScreenScrollContext;
         self.toolbar.translucent = NO;
         
         // temporarilly show toolbar to copy backgroundImage safely
-        isUIBarHidden = _viewController.navigationController.toolbarHidden;
+        isUIBarHidden = self.navigationController.toolbarHidden;
         if (isUIBarHidden) {
-            [_viewController.navigationController setToolbarHidden:NO];
+            [self.navigationController setToolbarHidden:NO];
         }
     }
     
@@ -622,7 +629,7 @@ static char __fullScreenScrollContext;
         
         // hide navigationBar if needed
         if (isUIBarHidden) {
-            [_viewController.navigationController setNavigationBarHidden:YES];
+            [self.navigationController setNavigationBarHidden:YES];
         }
     }
     else if (bar == self.toolbar) {
@@ -631,7 +638,7 @@ static char __fullScreenScrollContext;
         
         // hide toolbar if needed
         if (isUIBarHidden) {
-            [_viewController.navigationController setToolbarHidden:YES];
+            [self.navigationController setToolbarHidden:YES];
         }
     }
 }
