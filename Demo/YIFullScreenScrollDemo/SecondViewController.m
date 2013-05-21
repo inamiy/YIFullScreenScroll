@@ -32,7 +32,9 @@
     self.fullScreenScroll.shouldShowUIBarsOnScrollUp = NO;
     
     // this property controls hiding UI-bars via UIWebView's JavaScript calling window.scrollTo(0,1))
-    self.fullScreenScroll.shouldHideUIBarsWhenNotDragging = NO;
+    self.fullScreenScroll.shouldHideUIBarsWhenNotDragging = YES;
+    
+    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;    // fix tabBar position
 }
 
 - (void)viewDidUnload
