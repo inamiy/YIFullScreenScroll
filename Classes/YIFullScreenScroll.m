@@ -64,12 +64,16 @@ static char __fullScreenScrollContext;
         _viewController = viewController;
         _ignoresTranslucent = ignoresTranslucent;
         
+        _shouldHideUIBarsWhenNotDragging = NO;
+        
         _shouldShowUIBarsOnScrollUp = YES;
         _shouldHideNavigationBarOnScroll = YES;
         _shouldHideToolbarOnScroll = YES;
         _shouldHideTabBarOnScroll = YES;
         
         _enabled = YES; // don't call self.enabled = YES
+        
+        _layoutingUIBarsEnabled = YES;
         
         self.scrollView = scrollView;
         
@@ -263,22 +267,13 @@ static char __fullScreenScrollContext;
         else if ([keyPath isEqualToString:@"contentOffset"]) {
             
             if (!self.enabled) return;
+            if (!self.layoutingUIBarsEnabled) return;
             if (!self.isViewVisible) return;
             
             CGPoint newPoint = [change[NSKeyValueChangeNewKey] CGPointValue];
             CGPoint oldPoint = [change[NSKeyValueChangeOldKey] CGPointValue];
             
             CGFloat deltaY = newPoint.y - oldPoint.y;
-            
-            //
-            // Disable hiding when not dragging.
-            // (e.g. UIWebView's JavaScript calling window.scrollTo(0,1))
-            //
-            // But by checking deltaY > 0, UI-bars can be shown when scrolls to top.
-            //
-            if (!self.shouldHideUIBarsWhenNotDragging && !self.scrollView.isDragging && deltaY > 0) {
-                return;
-            }
             
             [self _layoutUIBarsWithDeltaY:deltaY];
             
@@ -360,6 +355,7 @@ static char __fullScreenScrollContext;
 - (void)_layoutUIBarsWithDeltaY:(CGFloat)deltaY
 {
     if (!self.enabled) return;
+    if (!self.layoutingUIBarsEnabled) return;
     if (deltaY == 0.0) return;
     
     UIScrollView* scrollView = self.scrollView;
@@ -404,7 +400,7 @@ static char __fullScreenScrollContext;
     if (deltaY == 0.0) return;
     
     // return if user hasn't dragged but trying to hide UI-bars (e.g. orientation change)
-    if (deltaY > 0 && !self.scrollView.isDragging) return;
+    if (deltaY > 0 && !self.scrollView.isDragging && !self.shouldHideUIBarsWhenNotDragging) return;
     
     // navbar
     UINavigationBar* navBar = self.navigationBar;

@@ -26,10 +26,12 @@
 
 @property (nonatomic) BOOL enabled; // default = YES
 
+@property (nonatomic) BOOL layoutingUIBarsEnabled; // can pause layouting UI-bars, default = YES
+
 @property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;      // default = YES
 
-// this property controls hiding UI-bars via UIWebView's JavaScript calling window.scrollTo(0,1))
-@property (nonatomic) BOOL shouldHideUIBarsWhenNotDragging; // default = YES
+// if YES, UI-bars can also be hidden via UIWebView's JavaScript calling window.scrollTo(0,1))
+@property (nonatomic) BOOL shouldHideUIBarsWhenNotDragging; // default = NO
 
 @property (nonatomic) BOOL shouldHideNavigationBarOnScroll; // default = YES
 @property (nonatomic) BOOL shouldHideToolbarOnScroll;       // default = YES
