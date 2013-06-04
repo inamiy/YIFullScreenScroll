@@ -358,20 +358,24 @@ static char __fullScreenScrollContext;
     if (!self.layoutingUIBarsEnabled) return;
     if (deltaY == 0.0) return;
     
+    BOOL canLayoutUIBars = YES;
+    
     UIScrollView* scrollView = self.scrollView;
     
     if (!self.isShowingUIBars) {
         
-        // return if contentSize.height is not enough
-        // (should skip when _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
-        if (self.isViewVisible && scrollView.contentSize.height+scrollView.contentInset.top+scrollView.contentInset.bottom < scrollView.frame.size.height) {
-            
-            return;
+        BOOL isContentHeightTooShortToLayoutUIBars = (scrollView.contentSize.height+scrollView.contentInset.bottom < scrollView.frame.size.height);
+        BOOL isContentHeightTooShortToLimitShiftPerScroll = (scrollView.contentSize.height+scrollView.contentInset.bottom < scrollView.frame.size.height+100);
+        
+        // don't layout UIBars if content is too short (adjust scrollIndicators only)
+        // (skip if _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
+        if (self.isViewVisible && isContentHeightTooShortToLayoutUIBars) {
+            canLayoutUIBars = NO;
         }
         
         CGFloat offsetY = scrollView.contentOffset.y-self.contentOffsetYToStartHiding;
         
-        CGFloat maxOffsetY = scrollView.contentSize.height-scrollView.frame.size.height;
+        CGFloat maxOffsetY = scrollView.contentSize.height+scrollView.contentInset.bottom-scrollView.frame.size.height;
         
         //
         // Don't let UI-bars appear when:
@@ -389,11 +393,14 @@ static char __fullScreenScrollContext;
             deltaY = -fabs(deltaY);
         }
         
-        deltaY = MIN(deltaY, MAX_SHIFT_PER_SCROLL);
+        // if there is enough scrolling distance, use MAX_SHIFT_PER_SCROLL for smoother shifting
+        CGFloat maxShiftPerScroll = (isContentHeightTooShortToLimitShiftPerScroll ? CGFLOAT_MAX : MAX_SHIFT_PER_SCROLL);
+        
+        deltaY = MIN(deltaY, maxShiftPerScroll);
         
         // NOTE: don't limit deltaY in case of navBar being partially hidden & scrolled-up very fast
         if (offsetY > 0) {
-            deltaY = MAX(deltaY, -MAX_SHIFT_PER_SCROLL);
+            deltaY = MAX(deltaY, -maxShiftPerScroll);
         }
     }
     
@@ -406,7 +413,9 @@ static char __fullScreenScrollContext;
     UINavigationBar* navBar = self.navigationBar;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-        navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
+        if (canLayoutUIBars) {
+            navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
+        }
     }
     
     // toolbar
@@ -421,7 +430,10 @@ static char __fullScreenScrollContext;
         else {
             toolbarSuperviewHeight = toolbar.superview.height;
         }
-        toolbar.top = MIN(MAX(toolbar.top+deltaY, toolbarSuperviewHeight-toolbar.height), toolbarSuperviewHeight);
+        
+        if (canLayoutUIBars) {
+            toolbar.top = MIN(MAX(toolbar.top+deltaY, toolbarSuperviewHeight-toolbar.height), toolbarSuperviewHeight);
+        }
     }
     
     // tabBar
@@ -435,10 +447,13 @@ static char __fullScreenScrollContext;
         else {
             tabBarSuperviewHeight = tabBar.superview.height;
         }
-        tabBar.top = MIN(MAX(tabBar.top+deltaY, tabBarSuperviewHeight-tabBar.height), tabBarSuperviewHeight);
+        
+        if (canLayoutUIBars) {
+            tabBar.top = MIN(MAX(tabBar.top+deltaY, tabBarSuperviewHeight-tabBar.height), tabBarSuperviewHeight);
+        }
     }
     
-    if (self.enabled && self.isViewVisible) {
+    if (self.enabled) {
         
         // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
@@ -455,8 +470,10 @@ static char __fullScreenScrollContext;
         scrollView.scrollIndicatorInsets = insets;
         
         // delegation
-        if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
-            [_delegate fullScreenScrollDidLayoutUIBars:self];
+        if (self.isViewVisible && canLayoutUIBars) {
+            if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
+                [_delegate fullScreenScrollDidLayoutUIBars:self];
+            }
         }
     }
 }
@@ -477,6 +494,12 @@ static char __fullScreenScrollContext;
         
         if (expanding) {
             tabBarTransitionView.frame = self.tabBarController.view.bounds;
+            
+            // add extra contentInset.bottom for tabBar-expansion
+            UIEdgeInsets insets = _scrollView.contentInset;
+            insets.bottom += self.tabBar.frame.size.height;
+            _scrollView.contentInset = insets;
+            
         }
         else {
             UITabBar* tabBar = self.tabBar;
