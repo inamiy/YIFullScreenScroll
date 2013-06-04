@@ -35,6 +35,7 @@ static char __fullScreenScrollContext;
     UIImageView*        _customToolbarBackground;
     
     UIEdgeInsets        _defaultScrollIndicatorInsets;
+    UIEdgeInsets        _defaultContentInsets;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
@@ -119,6 +120,7 @@ static char __fullScreenScrollContext;
                                                        object:nil];
             
             _defaultScrollIndicatorInsets = _scrollView.scrollIndicatorInsets;
+            _defaultContentInsets = _scrollView.contentInset;
         }
         
     }
@@ -496,7 +498,7 @@ static char __fullScreenScrollContext;
             tabBarTransitionView.frame = self.tabBarController.view.bounds;
             
             // add extra contentInset.bottom for tabBar-expansion
-            UIEdgeInsets insets = _scrollView.contentInset;
+            UIEdgeInsets insets = _defaultContentInsets;
             insets.bottom += self.tabBar.frame.size.height;
             _scrollView.contentInset = insets;
             
@@ -510,6 +512,8 @@ static char __fullScreenScrollContext;
             
             // scrollIndicatorInsets will be modified when tabBarTransitionView shrinks, so reset it here.
             _scrollView.scrollIndicatorInsets = _defaultScrollIndicatorInsets;
+            
+            _scrollView.contentInset = _defaultContentInsets;
         }
     }
     
