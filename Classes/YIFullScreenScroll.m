@@ -35,6 +35,7 @@ static char __fullScreenScrollContext;
     UIImageView*        _customToolbarBackground;
     
     UIEdgeInsets        _defaultScrollIndicatorInsets;
+    UIEdgeInsets        _defaultContentInsets;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
@@ -171,6 +172,11 @@ static char __fullScreenScrollContext;
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    // set _defaultContentInsets after scrollView.contentInset is changed by navBar/toolbar-translucent
+    if (UIEdgeInsetsEqualToEdgeInsets(_defaultContentInsets, UIEdgeInsetsZero)) {
+        _defaultContentInsets = _scrollView.contentInset;
+    }
+    
     if (self.enabled) {
         // NOTE: required for tabBarController layouting
         [self _layoutContainerViewExpanding:YES];
@@ -496,7 +502,7 @@ static char __fullScreenScrollContext;
             tabBarTransitionView.frame = self.tabBarController.view.bounds;
             
             // add extra contentInset.bottom for tabBar-expansion
-            UIEdgeInsets insets = _scrollView.contentInset;
+            UIEdgeInsets insets = _defaultContentInsets;
             insets.bottom += self.tabBar.frame.size.height;
             _scrollView.contentInset = insets;
             
@@ -511,9 +517,7 @@ static char __fullScreenScrollContext;
             // scrollIndicatorInsets will be modified when tabBarTransitionView shrinks, so reset it here.
             _scrollView.scrollIndicatorInsets = _defaultScrollIndicatorInsets;
             
-            UIEdgeInsets insets = _scrollView.contentInset;
-            insets.bottom -= self.tabBar.frame.size.height;
-            _scrollView.contentInset = insets;
+            _scrollView.contentInset = _defaultContentInsets;
         }
     }
     
