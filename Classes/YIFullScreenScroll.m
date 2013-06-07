@@ -65,12 +65,16 @@ static char __fullScreenScrollContext;
         _viewController = viewController;
         _ignoresTranslucent = ignoresTranslucent;
         
-        _shouldHideUIBarsWhenNotDragging = NO;
-        
         _shouldShowUIBarsOnScrollUp = YES;
+        
         _shouldHideNavigationBarOnScroll = YES;
         _shouldHideToolbarOnScroll = YES;
         _shouldHideTabBarOnScroll = YES;
+        
+        _shouldHideUIBarsWhenNotDragging = NO;
+        _shouldHideUIBarsWhenContentHeightIsTooShort = NO;
+        
+        _contentOffsetYToStartHiding = 0.0;
         
         _enabled = YES; // don't call self.enabled = YES
         
@@ -375,7 +379,7 @@ static char __fullScreenScrollContext;
         
         // don't layout UIBars if content is too short (adjust scrollIndicators only)
         // (skip if _viewController.view is not visible yet, which tableView.contentSize.height is normally 0)
-        if (self.isViewVisible && isContentHeightTooShortToLayoutUIBars) {
+        if (self.isViewVisible && !self.shouldHideUIBarsWhenContentHeightIsTooShort && isContentHeightTooShortToLayoutUIBars) {
             canLayoutUIBars = NO;
         }
         
