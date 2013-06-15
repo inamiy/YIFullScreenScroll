@@ -392,7 +392,7 @@ static char __fullScreenScrollContext;
         // 1. scroll reaches to bottom
         // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (until offfset.y reaches top)
         //
-        if ((maxOffsetY > 0 && offsetY > maxOffsetY) ||
+        if ((maxOffsetY > 0 && offsetY >= maxOffsetY) ||
             (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && offsetY > 0)) {
             
             deltaY = fabs(deltaY);
