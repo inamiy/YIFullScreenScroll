@@ -481,7 +481,8 @@ static char __fullScreenScrollContext;
         scrollView.scrollIndicatorInsets = insets;
         
         // delegation
-        if (canLayoutUIBars) {
+        // (ignore isViewVisible=NO when view is appearing/disappearing)
+        if (self.isViewVisible && canLayoutUIBars) {
             if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
                 [_delegate fullScreenScrollDidLayoutUIBars:self];
             }
