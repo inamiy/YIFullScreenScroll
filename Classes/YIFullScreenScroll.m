@@ -91,7 +91,7 @@ static char __fullScreenScrollContext;
     if (self.isViewVisible) {
         self.enabled = NO;
     }
-
+    
     self.scrollView = nil;
 }
 
@@ -167,9 +167,8 @@ static char __fullScreenScrollContext;
         // if no modal
         if (!_viewController.presentedViewController) {
             [self _setupUIBarBackgrounds];
+            [self showUIBarsAnimated:NO];
         }
-        
-        [self showUIBarsAnimated:NO];
     }
 }
 
@@ -202,13 +201,6 @@ static char __fullScreenScrollContext;
     self.isViewVisible = NO;
     
     if (self.enabled) {
-        
-        // if modal
-        if (_viewController.presentedViewController) {
-            //[self _teardownUIBarBackgrounds]; // no teardown
-            [self showUIBarsAnimated:NO];
-        }
-        
         [self _layoutContainerViewExpanding:NO];
     }
 }
