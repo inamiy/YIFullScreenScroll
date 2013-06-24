@@ -34,6 +34,8 @@
 @property (nonatomic) BOOL shouldHideToolbarOnScroll;       // default = YES
 @property (nonatomic) BOOL shouldHideTabBarOnScroll;        // default = YES
 
+@property (nonatomic) BOOL shouldHideUIBarsGradually;       // default = YES
+
 // if YES, UI-bars can also be hidden via UIWebView's JavaScript calling window.scrollTo(0,1))
 @property (nonatomic) BOOL shouldHideUIBarsWhenNotDragging;             // default = NO
 

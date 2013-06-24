@@ -13,7 +13,7 @@
 #define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define STATUS_BAR_HEIGHT   (IS_PORTRAIT ? [UIApplication sharedApplication].statusBarFrame.size.height : [UIApplication sharedApplication].statusBarFrame.size.width)
 
-#define MAX_SHIFT_PER_SCROLL    10
+#define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
 static char __fullScreenScrollContext;
 
@@ -70,6 +70,7 @@ static char __fullScreenScrollContext;
         _shouldHideToolbarOnScroll = YES;
         _shouldHideTabBarOnScroll = YES;
         
+        _shouldHideUIBarsGradually = YES;
         _shouldHideUIBarsWhenNotDragging = NO;
         _shouldHideUIBarsWhenContentHeightIsTooShort = NO;
         
@@ -401,7 +402,10 @@ static char __fullScreenScrollContext;
         }
         
         // if there is enough scrolling distance, use MAX_SHIFT_PER_SCROLL for smoother shifting
-        CGFloat maxShiftPerScroll = (isContentHeightTooShortToLimitShiftPerScroll ? CGFLOAT_MAX : MAX_SHIFT_PER_SCROLL);
+        CGFloat maxShiftPerScroll = CGFLOAT_MAX;
+        if (_shouldHideUIBarsGradually && !isContentHeightTooShortToLimitShiftPerScroll) {
+            maxShiftPerScroll = MAX_SHIFT_PER_SCROLL;
+        }
         
         deltaY = MIN(deltaY, maxShiftPerScroll);
         
