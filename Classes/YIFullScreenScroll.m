@@ -161,16 +161,14 @@ static char __fullScreenScrollContext;
 {
     self.isViewVisible = NO;
     
-    // don't setup & show UIBars if dismissing modalViewController
-    if (!_viewController.presentedViewController) {
+    if (self.enabled) {
         
-        if (self.enabled) {
+        // if no modal
+        if (!_viewController.presentedViewController) {
             [self _setupUIBarBackgrounds];
         }
         
-        // always show, regardless of _enabled
         [self showUIBarsAnimated:NO];
-        
     }
 }
 
@@ -188,16 +186,13 @@ static char __fullScreenScrollContext;
 {
     self.isViewVisible = NO;
     
-    // don't teardown & show UIBars if presenting modalViewController
-    if (!_viewController.presentedViewController) {
+    if (self.enabled) {
         
-        if (self.enabled) {
+        // if no modal
+        if (!_viewController.presentedViewController) {
             [self _teardownUIBarBackgrounds];
+            [self showUIBarsAnimated:NO];
         }
-        
-        // always show, regardless of _enabled
-        [self showUIBarsAnimated:NO];
-        
     }
 }
 
@@ -206,6 +201,13 @@ static char __fullScreenScrollContext;
     self.isViewVisible = NO;
     
     if (self.enabled) {
+        
+        // if modal
+        if (_viewController.presentedViewController) {
+            //[self _teardownUIBarBackgrounds]; // no teardown
+            [self showUIBarsAnimated:NO];
+        }
+        
         [self _layoutContainerViewExpanding:NO];
     }
 }
@@ -475,7 +477,7 @@ static char __fullScreenScrollContext;
         scrollView.scrollIndicatorInsets = insets;
         
         // delegation
-        if (self.isViewVisible && canLayoutUIBars) {
+        if (canLayoutUIBars) {
             if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
                 [_delegate fullScreenScrollDidLayoutUIBars:self];
             }
