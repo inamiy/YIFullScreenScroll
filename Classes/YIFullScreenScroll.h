@@ -41,7 +41,8 @@
 
 @property (nonatomic) BOOL shouldHideUIBarsWhenContentHeightIsTooShort; // default = NO
 
-@property (nonatomic) CGFloat contentOffsetYToStartHiding;  // default = 0.0
+@property (nonatomic) CGFloat additionalOffsetYToStartHiding;   // default = 0.0
+@property (nonatomic) CGFloat additionalOffsetYToStartShowing;  // default = 0.0
 
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView;

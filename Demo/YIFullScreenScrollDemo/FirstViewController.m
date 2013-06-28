@@ -39,7 +39,8 @@
 //    self.fullScreenScroll.shouldHideToolbarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;
     
-//    self.fullScreenScroll.contentOffsetYToStartHiding = 100;
+//    self.fullScreenScroll.additionalOffsetYToStartHiding = 200;
+//    self.fullScreenScroll.additionalOffsetYToStartShowing = 100;
     
     // pulldown dummy view
     // TODO: avoid navBar-translucency when rotating

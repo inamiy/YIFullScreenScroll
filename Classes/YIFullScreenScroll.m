@@ -74,7 +74,8 @@ static char __fullScreenScrollContext;
         _shouldHideUIBarsWhenNotDragging = NO;
         _shouldHideUIBarsWhenContentHeightIsTooShort = NO;
         
-        _contentOffsetYToStartHiding = 0.0;
+        _additionalOffsetYToStartHiding = 0.0;
+        _additionalOffsetYToStartShowing = 0.0;
         
         _enabled = YES; // don't call self.enabled = YES
         
@@ -373,23 +374,22 @@ static char __fullScreenScrollContext;
             canLayoutUIBars = NO;
         }
         
-        CGFloat offsetY = scrollView.contentOffset.y-self.contentOffsetYToStartHiding;
+        CGFloat offsetY = scrollView.contentOffset.y;
         
         CGFloat maxOffsetY = scrollView.contentSize.height+scrollView.contentInset.bottom-scrollView.frame.size.height;
         
         //
-        // Don't let UI-bars appear when:
-        // 1. scroll reaches to bottom
-        // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (until offfset.y reaches top)
+        // Keep hiding UI-bars when:
+        // 1. scroll reached bottom
+        // 2. shouldShowUIBarsOnScrollUp = NO & scrolling up (until offset.y reaches either top or additionalOffsetYToStartShowing)
         //
         if ((maxOffsetY > 0 && offsetY >= maxOffsetY) ||
-            (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && offsetY > 0)) {
+            (!self.shouldShowUIBarsOnScrollUp && deltaY < 0 && offsetY-self.additionalOffsetYToStartShowing > 0)) {
             
             deltaY = fabs(deltaY);
         }
-        // always set negative when scrolling up too high
-        else if (offsetY <= -scrollView.contentInset.top) {
-            
+        // always show UI-bars when scrolling up too high
+        else if (offsetY-self.additionalOffsetYToStartHiding <= -scrollView.contentInset.top) {
             deltaY = -fabs(deltaY);
         }
         
