@@ -8,7 +8,7 @@
 
 #import "YIFullScreenScroll.h"
 #import <objc/runtime.h>
-#import "UIView+YIFullScreenScroll.h"
+#import "ViewUtils.h"
 
 #define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define STATUS_BAR_HEIGHT   (IS_PORTRAIT ? [UIApplication sharedApplication].statusBarFrame.size.height : [UIApplication sharedApplication].statusBarFrame.size.width)
