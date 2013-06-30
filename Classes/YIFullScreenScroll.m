@@ -11,7 +11,6 @@
 #import "ViewUtils.h"
 
 #define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
-#define STATUS_BAR_HEIGHT   (IS_PORTRAIT ? [UIApplication sharedApplication].statusBarFrame.size.height : [UIApplication sharedApplication].statusBarFrame.size.width)
 
 #define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
@@ -35,6 +34,8 @@ static char __fullScreenScrollContext;
     UIImageView*        _customToolbarBackground;
     
     UIEdgeInsets        _defaultScrollIndicatorInsets;
+    
+    CGFloat             _defaultNavBarTop;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
@@ -63,6 +64,8 @@ static char __fullScreenScrollContext;
         
         _viewController = viewController;
         _ignoresTranslucent = ignoresTranslucent;
+        
+        _defaultNavBarTop = self.navigationBar.top;
         
         _shouldShowUIBarsOnScrollUp = YES;
         
@@ -417,7 +420,7 @@ static char __fullScreenScrollContext;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
         if (canLayoutUIBars) {
-            navBar.top = MIN(MAX(navBar.top-deltaY, STATUS_BAR_HEIGHT-navBar.height), STATUS_BAR_HEIGHT);
+            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height), _defaultNavBarTop);
         }
     }
     
@@ -461,7 +464,7 @@ static char __fullScreenScrollContext;
         // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-            insets.top = navBar.bottom-STATUS_BAR_HEIGHT;
+            insets.top = navBar.bottom-_defaultNavBarTop;
         }
         insets.bottom = 0;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {
