@@ -1,4 +1,4 @@
-YIFullScreenScroll 1.0.0
+YIFullScreenScroll 1.1.0
 ========================
 
 Pinterest-like scroll-to-fullscreen UI for iOS5+.
@@ -13,7 +13,7 @@ Install via [CocoaPods](http://cocoapods.org/)
 ----------
 
 ```
-pod 'YIFullScreenScroll', :git => 'https://github.com/inamiy/YIFullScreenScroll.git'
+pod 'YIFullScreenScroll'
 ```
     
 How to use
@@ -36,6 +36,11 @@ How to use
 //    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;
 }
 ```
+
+Dependencies
+------------
+- [JRSwizzle 1.0](https://github.com/rentzsch/jrswizzle)
+- [ViewUtils 1.1](https://github.com/nicklockwood/ViewUtils)
 
 License
 -------
