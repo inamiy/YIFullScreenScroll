@@ -396,8 +396,7 @@ static char __fullScreenScrollContext;
             deltaY = -fabs(deltaY);
         }
         // adjust deltaY if prev-scroll-position was up too high, but now it is not (= about to start hiding)
-        // (NOTE: ignore _shouldHideUIBarsGradually=YES which UI-bar-position doesn't fully sync with contentOffset)
-        else if (!_shouldHideUIBarsGradually && offsetY-deltaY-self.additionalOffsetYToStartHiding <= -scrollView.contentInset.top) {
+        else if (offsetY-deltaY-self.additionalOffsetYToStartHiding <= -scrollView.contentInset.top) {
             deltaY = offsetY-self.additionalOffsetYToStartHiding+scrollView.contentInset.top;
         }
         
