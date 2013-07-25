@@ -21,6 +21,7 @@ static char __fullScreenScrollContext;
 
 @property (nonatomic) BOOL isShowingUIBars;
 @property (nonatomic) BOOL isViewVisible;
+@property (nonatomic) BOOL hasViewAppearedBefore;
 
 @end
 
@@ -36,6 +37,8 @@ static char __fullScreenScrollContext;
     UIEdgeInsets        _defaultScrollIndicatorInsets;
     
     CGFloat             _defaultNavBarTop;
+    
+    BOOL _areUIBarBackgroundsReady;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
@@ -168,11 +171,13 @@ static char __fullScreenScrollContext;
     
     if (self.enabled) {
         
-        // if no modal
-        if (!_viewController.presentedViewController) {
+        // if no modal or 1st viewWillAppear
+        if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
             [self _setupUIBarBackgrounds];
-            [self showUIBarsAnimated:NO];
         }
+        
+        // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
+        [self showUIBarsAnimated:NO];
     }
 }
 
@@ -184,6 +189,7 @@ static char __fullScreenScrollContext;
     }
     
     self.isViewVisible = YES;   // set YES after layouting
+    self.hasViewAppearedBefore = YES;
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -536,6 +542,8 @@ static char __fullScreenScrollContext;
 
 - (void)_setupUIBarBackgrounds
 {
+    if (_areUIBarBackgroundsReady) return;
+    
     if (self.navigationController) {
         
         UINavigationBar* navBar = self.navigationBar;
@@ -578,10 +586,14 @@ static char __fullScreenScrollContext;
             toolbar.translucent = NO;
         }
     }
+    
+    _areUIBarBackgroundsReady = YES;
 }
 
 - (void)_teardownUIBarBackgrounds
 {
+    if (!_areUIBarBackgroundsReady) return;
+    
     if (_ignoresTranslucent) {
         [self _removeCustomBackgroundOnUIBar:self.navigationBar];
         [self _removeCustomBackgroundOnUIBar:self.toolbar];
@@ -598,6 +610,8 @@ static char __fullScreenScrollContext;
     
     self.navigationBar.translucent = NO;
     self.toolbar.translucent = NO;
+    
+    _areUIBarBackgroundsReady = NO;
 }
 
 - (BOOL)_hasCustomBackgroundOnUIBar:(UIView*)bar
