@@ -1,4 +1,4 @@
-YIFullScreenScroll 1.1.1
+YIFullScreenScroll 1.1.2
 ========================
 
 Pinterest-like scroll-to-fullscreen UI for iOS5+.
