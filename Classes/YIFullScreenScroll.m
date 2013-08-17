@@ -68,8 +68,6 @@ static char __fullScreenScrollContext;
         _viewController = viewController;
         _ignoresTranslucent = ignoresTranslucent;
         
-        _defaultNavBarTop = self.navigationBar.top;
-        
         _shouldShowUIBarsOnScrollUp = YES;
         
         _shouldHideNavigationBarOnScroll = YES;
@@ -173,6 +171,10 @@ static char __fullScreenScrollContext;
         
         // if no modal or 1st viewWillAppear
         if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
+            
+            // evaluate defaultNavBarTop when view is loaded
+            _defaultNavBarTop = self.navigationBar.top;
+            
             [self _setupUIBarBackgrounds];
         }
         
