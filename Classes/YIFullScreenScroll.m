@@ -355,9 +355,7 @@ static char __fullScreenScrollContext;
 - (BOOL)isTabBarExisting
 {
     UITabBar* tabBar = self.tabBar;
-    
-    // NOTE: tabBar.left == 0 is required when hidesBottomBarWhenPushed=YES
-    return tabBar && tabBar.superview && !tabBar.hidden && (tabBar.left == 0);
+    return tabBar && tabBar.superview && !tabBar.hidden;
 }
 
 #pragma mark -
