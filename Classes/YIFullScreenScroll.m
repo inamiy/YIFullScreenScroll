@@ -175,8 +175,16 @@ static char __fullScreenScrollContext;
             // evaluate defaultNavBarTop when view is loaded
             _defaultNavBarTop = self.navigationBar.top;
             
-            [self _setupUIBarBackgrounds];
+            //
+            // comment-out:
+            //
+            // Always call _setupUIBarBackgrounds when enabled,
+            // since there is a case where modal is presented in other presentingViewController
+            // but is suddenly changed to _viewController e.g. via tabBar-switching.
+            //
+            //[self _setupUIBarBackgrounds];
         }
+        [self _setupUIBarBackgrounds];
         
         // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
         [self showUIBarsAnimated:NO];
