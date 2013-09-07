@@ -10,11 +10,42 @@
 #import <objc/runtime.h>
 #import "ViewUtils.h"
 
-#define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
+#define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
+#define IS_IOS_AT_LEAST(ver)    ([[[UIDevice currentDevice] systemVersion] compare:ver] != NSOrderedAscending)
 
 #define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
 static char __fullScreenScrollContext;
+
+
+#pragma mark -
+
+
+@implementation UINavigationBar (YIFullScreenScroll)
+
+- (void)setTranslucentIfNeeded:(BOOL)translucent
+{
+    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    
+    self.translucent = translucent;
+}
+
+@end
+
+
+@implementation UIToolbar (YIFullScreenScroll)
+
+- (void)setTranslucentIfNeeded:(BOOL)translucent
+{
+    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    
+    self.translucent = translucent;
+}
+
+@end
+
+
+#pragma mark -
 
 
 @interface YIFullScreenScroll ()
@@ -37,13 +68,14 @@ static char __fullScreenScrollContext;
     UIEdgeInsets        _defaultScrollIndicatorInsets;
     
     CGFloat             _defaultNavBarTop;
+    CGFloat             _additionalNavBarShiftForIOS7StatusBar;
     
     BOOL _areUIBarBackgroundsReady;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
     
-    BOOL _ignoresTranslucent;
+    BOOL _shouldUseCustomBackground;
 }
 
 #pragma mark -
@@ -53,20 +85,24 @@ static char __fullScreenScrollContext;
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
 {
+    BOOL shouldUseCustomBackground = !IS_IOS_AT_LEAST(@"7.0");
+    
     return [self initWithViewController:viewController
                              scrollView:scrollView
-                     ignoresTranslucent:YES];
+              shouldUseCustomBackground:shouldUseCustomBackground];
 }
 
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
-          ignoresTranslucent:(BOOL)ignoresTranslucent
+   shouldUseCustomBackground:(BOOL)shouldUseCustomBackground
 {
     self = [super init];
     if (self) {
         
         _viewController = viewController;
-        _ignoresTranslucent = ignoresTranslucent;
+        _shouldUseCustomBackground = shouldUseCustomBackground;
+        
+        _additionalNavBarShiftForIOS7StatusBar = IS_IOS_AT_LEAST(@"7.0") ? 20 : 0;
         
         _shouldShowUIBarsOnScrollUp = YES;
         
@@ -248,7 +284,7 @@ static char __fullScreenScrollContext;
         [UIView animateWithDuration:0.1 animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
-            [weakSelf _layoutUIBarsWithDeltaY:-50];
+            [weakSelf _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
             
         } completion:^(BOOL finished) {
             
@@ -261,7 +297,7 @@ static char __fullScreenScrollContext;
         }];
     }
     else {
-        [self _layoutUIBarsWithDeltaY:-50];
+        [self _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
         self.isShowingUIBars = NO;
     }
     
@@ -438,7 +474,7 @@ static char __fullScreenScrollContext;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
         if (canLayoutUIBars) {
-            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height), _defaultNavBarTop);
+            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height-_additionalNavBarShiftForIOS7StatusBar), _defaultNavBarTop);
         }
     }
     
@@ -477,12 +513,12 @@ static char __fullScreenScrollContext;
         }
     }
     
-    if (self.enabled) {
+    if (self.enabled && self.isViewVisible) {
         
         // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-            insets.top = navBar.bottom-_defaultNavBarTop;
+            insets.top = navBar.bottom-_defaultNavBarTop+_additionalNavBarShiftForIOS7StatusBar;
         }
         insets.bottom = 0;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {
@@ -494,8 +530,7 @@ static char __fullScreenScrollContext;
         scrollView.scrollIndicatorInsets = insets;
         
         // delegation
-        // (ignore isViewVisible=NO when view is appearing/disappearing)
-        if (self.isViewVisible && canLayoutUIBars) {
+        if (canLayoutUIBars) {
             if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
                 [_delegate fullScreenScrollDidLayoutUIBars:self];
             }
@@ -561,7 +596,7 @@ static char __fullScreenScrollContext;
         if (_shouldHideNavigationBarOnScroll) {
             
             // hide original background & add opaque custom one
-            if (_ignoresTranslucent) {
+            if (_shouldUseCustomBackground) {
                 [self _addCustomBackgroundOnUIBar:navBar];
                 
                 if (!_isObservingNavBar) {
@@ -569,17 +604,17 @@ static char __fullScreenScrollContext;
                     _isObservingNavBar = YES;
                 }
             }
-            navBar.translucent = YES;
+            navBar.translucentIfNeeded = YES;
         }
         else {
-            navBar.translucent = NO;
+            navBar.translucentIfNeeded = NO;
         }
         
         // toolbar
         if (_shouldHideToolbarOnScroll) {
             
             // hide original background & add opaque custom one
-            if (_ignoresTranslucent) {
+            if (_shouldUseCustomBackground) {
                 [self _addCustomBackgroundOnUIBar:toolbar];
                 
                 if (!_isObservingToolbar) {
@@ -588,10 +623,10 @@ static char __fullScreenScrollContext;
                 }
                 
             }
-            toolbar.translucent = YES;
+            toolbar.translucentIfNeeded = YES;
         }
         else {
-            toolbar.translucent = NO;
+            toolbar.translucentIfNeeded = NO;
         }
     }
     
@@ -602,7 +637,7 @@ static char __fullScreenScrollContext;
 {
     if (!_areUIBarBackgroundsReady) return;
     
-    if (_ignoresTranslucent) {
+    if (_shouldUseCustomBackground) {
         [self _removeCustomBackgroundOnUIBar:self.navigationBar];
         [self _removeCustomBackgroundOnUIBar:self.toolbar];
         
@@ -616,8 +651,8 @@ static char __fullScreenScrollContext;
         }
     }
     
-    self.navigationBar.translucent = NO;
-    self.toolbar.translucent = NO;
+    self.navigationBar.translucentIfNeeded = NO;
+    self.toolbar.translucentIfNeeded = NO;
     
     _areUIBarBackgroundsReady = NO;
 }
@@ -648,7 +683,7 @@ static char __fullScreenScrollContext;
     // temporarilly set translucent=NO to copy custom backgroundImage
     if (bar == self.navigationBar) {
         [_customNavBarBackground removeFromSuperview];
-        self.navigationBar.translucent = NO;
+        self.navigationBar.translucentIfNeeded = NO;
         
         // temporarilly show navigationBar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.navigationBarHidden;
@@ -658,7 +693,7 @@ static char __fullScreenScrollContext;
     }
     else if (bar == self.toolbar) {
         [_customToolbarBackground removeFromSuperview];
-        self.toolbar.translucent = NO;
+        self.toolbar.translucentIfNeeded = NO;
         
         // temporarilly show toolbar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.toolbarHidden;
@@ -680,7 +715,7 @@ static char __fullScreenScrollContext;
     customBarImageView.autoresizingMask = originalBackground.autoresizingMask | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     if (bar == self.navigationBar) {
-        self.navigationBar.translucent = YES;
+        self.navigationBar.translucentIfNeeded = YES;
         _customNavBarBackground = customBarImageView;
         
         // hide navigationBar if needed
@@ -689,7 +724,7 @@ static char __fullScreenScrollContext;
         }
     }
     else if (bar == self.toolbar) {
-        self.toolbar.translucent = YES;
+        self.toolbar.translucentIfNeeded = YES;
         _customToolbarBackground = customBarImageView;
         
         // hide toolbar if needed

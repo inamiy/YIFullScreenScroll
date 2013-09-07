@@ -107,9 +107,16 @@
 
 - (IBAction)handleTintColorButton:(id)sender
 {
-    
-    
     UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:0.8 brightness:0.8 alpha:1];
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+    if ([self.navigationController.navigationBar respondsToSelector:@selector(barTintColor)]) {
+        self.navigationController.navigationBar.barTintColor = randomColor;
+        self.navigationController.toolbar.barTintColor = randomColor;
+        
+        return;
+    }
+#endif
     
     self.navigationController.navigationBar.tintColor = randomColor;
     self.navigationController.toolbar.tintColor = randomColor;
