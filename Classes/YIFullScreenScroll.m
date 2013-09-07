@@ -540,6 +540,9 @@ static char __fullScreenScrollContext;
 
 - (void)_layoutContainerViewExpanding:(BOOL)expanding
 {
+    // tabBarController layouting is no longer needed from iOS7
+    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    
     // toolbar (iOS5 fix which doesn't re-layout when translucent is set)
     if (_shouldHideToolbarOnScroll && self.isToolbarExisting) {
         BOOL toolbarHidden = self.navigationController.toolbarHidden;
