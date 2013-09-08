@@ -9,6 +9,7 @@
 #import "YIFullScreenScroll.h"
 #import <objc/runtime.h>
 #import "ViewUtils.h"
+#import "JRSwizzle.h"
 
 #define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define IS_IOS_AT_LEAST(ver)    ([[[UIDevice currentDevice] systemVersion] compare:ver] != NSOrderedAscending)
@@ -17,8 +18,27 @@
 
 static char __fullScreenScrollContext;
 
+static char __isFullScreenScrollViewKey;
+
 
 #pragma mark -
+
+#pragma mark Private Categories
+
+
+@implementation UIScrollView (YIFullScreenScroll)
+
+- (BOOL)isFullScreenScrollView
+{
+    return [objc_getAssociatedObject(self, &__isFullScreenScrollViewKey) boolValue];
+}
+
+- (void)setIsFullScreenScrollView:(BOOL)flag
+{
+    objc_setAssociatedObject(self, &__isFullScreenScrollViewKey, @(flag), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+@end
 
 
 @implementation UINavigationBar (YIFullScreenScroll)
@@ -40,6 +60,32 @@ static char __fullScreenScrollContext;
     if (IS_IOS_AT_LEAST(@"7.0")) return;
     
     self.translucent = translucent;
+}
+
+@end
+
+
+@implementation UISearchBar (YIFullScreenScroll)
+
++ (void)load
+{
+    [UISearchBar jr_swizzleMethod:@selector(layoutSubviews)
+                       withMethod:@selector(YIFullScreenScroll_layoutSubviews)
+                            error:NULL];
+}
+
+- (void)YIFullScreenScroll_layoutSubviews
+{
+    [self YIFullScreenScroll_layoutSubviews];
+    
+    if (!IS_IOS_AT_LEAST(@"7.0")) return;
+    
+    if ([self.superview isKindOfClass:[UIScrollView class]]) {
+        UIScrollView* scrollView = (id)self.superview;
+        if (scrollView.isFullScreenScrollView) {
+            [self.subviews[0] setClipsToBounds:NO];     // disable wrapper's clipsToBounds
+        }
+    }
 }
 
 @end
@@ -145,6 +191,8 @@ static char __fullScreenScrollContext;
     if (scrollView != _scrollView) {
         
         if (_scrollView) {
+            _scrollView.isFullScreenScrollView = NO;
+            
             [_scrollView removeObserver:self forKeyPath:@"contentOffset" context:&__fullScreenScrollContext];
             
             [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -153,6 +201,8 @@ static char __fullScreenScrollContext;
         _scrollView = scrollView;
         
         if (_scrollView) {
+            _scrollView.isFullScreenScrollView = YES;
+            
             [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
             
             //
