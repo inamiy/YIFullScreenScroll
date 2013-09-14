@@ -13,6 +13,7 @@
 
 #define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define IS_IOS_AT_LEAST(ver)    ([[[UIDevice currentDevice] systemVersion] compare:ver] != NSOrderedAscending)
+#define IS_FLAT_DESIGN          (__IPHONE_OS_VERSION_MAX_ALLOWED >= 70000 && IS_IOS_AT_LEAST(@"7.0"))
 
 #define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
@@ -45,7 +46,7 @@ static char __isFullScreenScrollViewKey;
 
 - (void)setTranslucentIfNeeded:(BOOL)translucent
 {
-    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    if (IS_FLAT_DESIGN) return;
     
     self.translucent = translucent;
 }
@@ -57,7 +58,7 @@ static char __isFullScreenScrollViewKey;
 
 - (void)setTranslucentIfNeeded:(BOOL)translucent
 {
-    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    if (IS_FLAT_DESIGN) return;
     
     self.translucent = translucent;
 }
@@ -78,7 +79,7 @@ static char __isFullScreenScrollViewKey;
 {
     [self YIFullScreenScroll_layoutSubviews];
     
-    if (!IS_IOS_AT_LEAST(@"7.0")) return;
+    if (!IS_FLAT_DESIGN) return;
     
     if ([self.superview isKindOfClass:[UIScrollView class]]) {
         UIScrollView* scrollView = (id)self.superview;
@@ -131,7 +132,7 @@ static char __isFullScreenScrollViewKey;
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
 {
-    BOOL shouldUseCustomBackground = !IS_IOS_AT_LEAST(@"7.0");
+    BOOL shouldUseCustomBackground = !IS_FLAT_DESIGN;
     
     return [self initWithViewController:viewController
                              scrollView:scrollView
@@ -148,7 +149,7 @@ static char __isFullScreenScrollViewKey;
         _viewController = viewController;
         _shouldUseCustomBackground = shouldUseCustomBackground;
         
-        _additionalNavBarShiftForIOS7StatusBar = IS_IOS_AT_LEAST(@"7.0") ? 20 : 0;
+        _additionalNavBarShiftForIOS7StatusBar = IS_FLAT_DESIGN ? 20 : 0;
         
         _shouldShowUIBarsOnScrollUp = YES;
         
@@ -591,7 +592,7 @@ static char __isFullScreenScrollViewKey;
 - (void)_layoutContainerViewExpanding:(BOOL)expanding
 {
     // tabBarController layouting is no longer needed from iOS7
-    if (IS_IOS_AT_LEAST(@"7.0")) return;
+    if (IS_FLAT_DESIGN) return;
     
     // toolbar (iOS5 fix which doesn't re-layout when translucent is set)
     if (_shouldHideToolbarOnScroll && self.isToolbarExisting) {
