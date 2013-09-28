@@ -228,4 +228,16 @@
 //    return @"Tints Color";
 //}
 
+#pragma mark -
+
+#pragma mark UISearchBarDelegate
+
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    // NOTE: this code is needed for iOS7
+    [self.fullScreenScroll adjustScrollPositionWhenSearchDisplayControllerBecomeActive];
+    
+    return YES;
+}
+
 @end
