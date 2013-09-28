@@ -9,12 +9,90 @@
 #import "YIFullScreenScroll.h"
 #import <objc/runtime.h>
 #import "ViewUtils.h"
+#import "JRSwizzle.h"
 
-#define IS_PORTRAIT         UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
+#define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
+#define IS_IOS_AT_LEAST(ver)    ([[[UIDevice currentDevice] systemVersion] compare:ver] != NSOrderedAscending)
+#define IS_FLAT_DESIGN          (__IPHONE_OS_VERSION_MAX_ALLOWED >= 70000 && IS_IOS_AT_LEAST(@"7.0"))
 
 #define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
 static char __fullScreenScrollContext;
+
+static char __isFullScreenScrollViewKey;
+
+
+#pragma mark -
+
+#pragma mark Private Categories
+
+
+@implementation UIScrollView (YIFullScreenScroll)
+
+- (BOOL)isFullScreenScrollView
+{
+    return [objc_getAssociatedObject(self, &__isFullScreenScrollViewKey) boolValue];
+}
+
+- (void)setIsFullScreenScrollView:(BOOL)flag
+{
+    objc_setAssociatedObject(self, &__isFullScreenScrollViewKey, @(flag), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+@end
+
+
+@implementation UINavigationBar (YIFullScreenScroll)
+
+- (void)setTranslucentIfNeeded:(BOOL)translucent
+{
+    if (IS_FLAT_DESIGN) return;
+    
+    self.translucent = translucent;
+}
+
+@end
+
+
+@implementation UIToolbar (YIFullScreenScroll)
+
+- (void)setTranslucentIfNeeded:(BOOL)translucent
+{
+    if (IS_FLAT_DESIGN) return;
+    
+    self.translucent = translucent;
+}
+
+@end
+
+
+@implementation UISearchBar (YIFullScreenScroll)
+
++ (void)load
+{
+    [UISearchBar jr_swizzleMethod:@selector(layoutSubviews)
+                       withMethod:@selector(YIFullScreenScroll_layoutSubviews)
+                            error:NULL];
+}
+
+- (void)YIFullScreenScroll_layoutSubviews
+{
+    [self YIFullScreenScroll_layoutSubviews];
+    
+    if (!IS_FLAT_DESIGN) return;
+    
+    if ([self.superview isKindOfClass:[UIScrollView class]]) {
+        UIScrollView* scrollView = (id)self.superview;
+        if (scrollView.isFullScreenScrollView) {
+            [self.subviews[0] setClipsToBounds:NO];     // disable wrapper's clipsToBounds
+        }
+    }
+}
+
+@end
+
+
+#pragma mark -
 
 
 @interface YIFullScreenScroll ()
@@ -37,13 +115,14 @@ static char __fullScreenScrollContext;
     UIEdgeInsets        _defaultScrollIndicatorInsets;
     
     CGFloat             _defaultNavBarTop;
+    CGFloat             _additionalNavBarShiftForIOS7StatusBar;
     
     BOOL _areUIBarBackgroundsReady;
     
     BOOL _isObservingNavBar;
     BOOL _isObservingToolbar;
     
-    BOOL _ignoresTranslucent;
+    BOOL _shouldUseCustomBackground;
 }
 
 #pragma mark -
@@ -53,20 +132,24 @@ static char __fullScreenScrollContext;
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
 {
+    BOOL shouldUseCustomBackground = !IS_FLAT_DESIGN;
+    
     return [self initWithViewController:viewController
                              scrollView:scrollView
-                     ignoresTranslucent:YES];
+              shouldUseCustomBackground:shouldUseCustomBackground];
 }
 
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
-          ignoresTranslucent:(BOOL)ignoresTranslucent
+   shouldUseCustomBackground:(BOOL)shouldUseCustomBackground
 {
     self = [super init];
     if (self) {
         
         _viewController = viewController;
-        _ignoresTranslucent = ignoresTranslucent;
+        _shouldUseCustomBackground = shouldUseCustomBackground;
+        
+        _additionalNavBarShiftForIOS7StatusBar = IS_FLAT_DESIGN ? 20 : 0;
         
         _shouldShowUIBarsOnScrollUp = YES;
         
@@ -109,6 +192,8 @@ static char __fullScreenScrollContext;
     if (scrollView != _scrollView) {
         
         if (_scrollView) {
+            _scrollView.isFullScreenScrollView = NO;
+            
             [_scrollView removeObserver:self forKeyPath:@"contentOffset" context:&__fullScreenScrollContext];
             
             [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -117,6 +202,8 @@ static char __fullScreenScrollContext;
         _scrollView = scrollView;
         
         if (_scrollView) {
+            _scrollView.isFullScreenScrollView = YES;
+            
             [_scrollView addObserver:self forKeyPath:@"contentOffset" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:&__fullScreenScrollContext];
             
             //
@@ -163,73 +250,6 @@ static char __fullScreenScrollContext;
 
 #pragma mark Public
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        
-        // if no modal or 1st viewWillAppear
-        if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
-            
-            // evaluate defaultNavBarTop when view is loaded
-            _defaultNavBarTop = self.navigationBar.top;
-            
-            //
-            // comment-out:
-            //
-            // Always call _setupUIBarBackgrounds when enabled,
-            // since there is a case where modal is presented in other presentingViewController
-            // but is suddenly changed to _viewController e.g. via tabBar-switching.
-            //
-            //[self _setupUIBarBackgrounds];
-        }
-        [self _setupUIBarBackgrounds];
-        
-        // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
-        [self showUIBarsAnimated:NO];
-    }
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    if (self.enabled) {
-        // NOTE: required for tabBarController layouting
-        [self _layoutContainerViewExpanding:YES];
-    }
-    
-    self.isViewVisible = YES;   // set YES after layouting
-    self.hasViewAppearedBefore = YES;
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        
-        // if no modal
-        if (!_viewController.presentedViewController) {
-            [self _teardownUIBarBackgrounds];
-            [self showUIBarsAnimated:NO];
-        }
-    }
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        [self _layoutContainerViewExpanding:NO];
-    }
-}
-
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-    [self showUIBarsAnimated:NO];
-}
-
 - (void)showUIBarsAnimated:(BOOL)animated
 {
     [self showUIBarsAnimated:animated completion:NULL];
@@ -248,7 +268,7 @@ static char __fullScreenScrollContext;
         [UIView animateWithDuration:0.1 animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
-            [weakSelf _layoutUIBarsWithDeltaY:-50];
+            [weakSelf _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
             
         } completion:^(BOOL finished) {
             
@@ -261,10 +281,17 @@ static char __fullScreenScrollContext;
         }];
     }
     else {
-        [self _layoutUIBarsWithDeltaY:-50];
+        [self _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
         self.isShowingUIBars = NO;
     }
     
+}
+
+- (void)adjustScrollPositionWhenSearchDisplayControllerBecomeActive
+{
+    if (IS_FLAT_DESIGN) {
+        [self.scrollView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+    }
 }
 
 #pragma mark -
@@ -438,7 +465,7 @@ static char __fullScreenScrollContext;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
         if (canLayoutUIBars) {
-            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height), _defaultNavBarTop);
+            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height-_additionalNavBarShiftForIOS7StatusBar), _defaultNavBarTop);
         }
     }
     
@@ -477,12 +504,12 @@ static char __fullScreenScrollContext;
         }
     }
     
-    if (self.enabled) {
+    if (self.enabled && self.isViewVisible) {
         
         // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-            insets.top = navBar.bottom-_defaultNavBarTop;
+            insets.top = navBar.bottom-_defaultNavBarTop+_additionalNavBarShiftForIOS7StatusBar;
         }
         insets.bottom = 0;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {
@@ -494,8 +521,7 @@ static char __fullScreenScrollContext;
         scrollView.scrollIndicatorInsets = insets;
         
         // delegation
-        // (ignore isViewVisible=NO when view is appearing/disappearing)
-        if (self.isViewVisible && canLayoutUIBars) {
+        if (canLayoutUIBars) {
             if ([_delegate respondsToSelector:@selector(fullScreenScrollDidLayoutUIBars:)]) {
                 [_delegate fullScreenScrollDidLayoutUIBars:self];
             }
@@ -505,6 +531,9 @@ static char __fullScreenScrollContext;
 
 - (void)_layoutContainerViewExpanding:(BOOL)expanding
 {
+    // tabBarController layouting is no longer needed from iOS7
+    if (IS_FLAT_DESIGN) return;
+    
     // toolbar (iOS5 fix which doesn't re-layout when translucent is set)
     if (_shouldHideToolbarOnScroll && self.isToolbarExisting) {
         BOOL toolbarHidden = self.navigationController.toolbarHidden;
@@ -561,7 +590,7 @@ static char __fullScreenScrollContext;
         if (_shouldHideNavigationBarOnScroll) {
             
             // hide original background & add opaque custom one
-            if (_ignoresTranslucent) {
+            if (_shouldUseCustomBackground) {
                 [self _addCustomBackgroundOnUIBar:navBar];
                 
                 if (!_isObservingNavBar) {
@@ -569,17 +598,17 @@ static char __fullScreenScrollContext;
                     _isObservingNavBar = YES;
                 }
             }
-            navBar.translucent = YES;
+            navBar.translucentIfNeeded = YES;
         }
         else {
-            navBar.translucent = NO;
+            navBar.translucentIfNeeded = NO;
         }
         
         // toolbar
         if (_shouldHideToolbarOnScroll) {
             
             // hide original background & add opaque custom one
-            if (_ignoresTranslucent) {
+            if (_shouldUseCustomBackground) {
                 [self _addCustomBackgroundOnUIBar:toolbar];
                 
                 if (!_isObservingToolbar) {
@@ -588,10 +617,10 @@ static char __fullScreenScrollContext;
                 }
                 
             }
-            toolbar.translucent = YES;
+            toolbar.translucentIfNeeded = YES;
         }
         else {
-            toolbar.translucent = NO;
+            toolbar.translucentIfNeeded = NO;
         }
     }
     
@@ -602,7 +631,7 @@ static char __fullScreenScrollContext;
 {
     if (!_areUIBarBackgroundsReady) return;
     
-    if (_ignoresTranslucent) {
+    if (_shouldUseCustomBackground) {
         [self _removeCustomBackgroundOnUIBar:self.navigationBar];
         [self _removeCustomBackgroundOnUIBar:self.toolbar];
         
@@ -616,8 +645,8 @@ static char __fullScreenScrollContext;
         }
     }
     
-    self.navigationBar.translucent = NO;
-    self.toolbar.translucent = NO;
+    self.navigationBar.translucentIfNeeded = NO;
+    self.toolbar.translucentIfNeeded = NO;
     
     _areUIBarBackgroundsReady = NO;
 }
@@ -648,7 +677,7 @@ static char __fullScreenScrollContext;
     // temporarilly set translucent=NO to copy custom backgroundImage
     if (bar == self.navigationBar) {
         [_customNavBarBackground removeFromSuperview];
-        self.navigationBar.translucent = NO;
+        self.navigationBar.translucentIfNeeded = NO;
         
         // temporarilly show navigationBar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.navigationBarHidden;
@@ -658,7 +687,7 @@ static char __fullScreenScrollContext;
     }
     else if (bar == self.toolbar) {
         [_customToolbarBackground removeFromSuperview];
-        self.toolbar.translucent = NO;
+        self.toolbar.translucentIfNeeded = NO;
         
         // temporarilly show toolbar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.toolbarHidden;
@@ -680,7 +709,7 @@ static char __fullScreenScrollContext;
     customBarImageView.autoresizingMask = originalBackground.autoresizingMask | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     if (bar == self.navigationBar) {
-        self.navigationBar.translucent = YES;
+        self.navigationBar.translucentIfNeeded = YES;
         _customNavBarBackground = customBarImageView;
         
         // hide navigationBar if needed
@@ -689,7 +718,7 @@ static char __fullScreenScrollContext;
         }
     }
     else if (bar == self.toolbar) {
-        self.toolbar.translucent = YES;
+        self.toolbar.translucentIfNeeded = YES;
         _customToolbarBackground = customBarImageView;
         
         // hide toolbar if needed
@@ -713,6 +742,78 @@ static char __fullScreenScrollContext;
     
     UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
     originalBackground.hidden = NO;
+}
+
+@end
+
+
+@implementation YIFullScreenScroll (ViewLifecycle)
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        
+        // if no modal or 1st viewWillAppear
+        if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
+            
+            // evaluate defaultNavBarTop when view is loaded
+            _defaultNavBarTop = self.navigationBar.top;
+            
+            //
+            // comment-out:
+            //
+            // Always call _setupUIBarBackgrounds when enabled,
+            // since there is a case where modal is presented in other presentingViewController
+            // but is suddenly changed to _viewController e.g. via tabBar-switching.
+            //
+            //[self _setupUIBarBackgrounds];
+        }
+        [self _setupUIBarBackgrounds];
+        
+        // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
+        [self showUIBarsAnimated:NO];
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    if (self.enabled) {
+        // NOTE: required for tabBarController layouting
+        [self _layoutContainerViewExpanding:YES];
+    }
+    
+    self.isViewVisible = YES;   // set YES after layouting
+    self.hasViewAppearedBefore = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        
+        // if no modal
+        if (!_viewController.presentedViewController) {
+            [self _teardownUIBarBackgrounds];
+            [self showUIBarsAnimated:NO];
+        }
+    }
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        [self _layoutContainerViewExpanding:NO];
+    }
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [self showUIBarsAnimated:NO];
 }
 
 @end
