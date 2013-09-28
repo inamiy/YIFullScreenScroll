@@ -287,6 +287,13 @@ static char __isFullScreenScrollViewKey;
     
 }
 
+- (void)adjustScrollPositionWhenSearchDisplayControllerBecomeActive
+{
+    if (IS_FLAT_DESIGN) {
+        [self.scrollView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+    }
+}
+
 #pragma mark -
 
 #pragma mark KVO
