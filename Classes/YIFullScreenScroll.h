@@ -50,6 +50,13 @@
 - (void)showUIBarsAnimated:(BOOL)animated;
 - (void)showUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 
+// If you are using UISearchDisplayController in iOS7, call this on '-searchBarShouldBeginEditing:'.
+// This will prevent from searchBar not responding touches
+// when you slightly scrolled down (about searchBar height) and then activate searchDisplayController.
+// (Implementing in '-searchDisplayControllerWillBeginSearch:' doesn't work)
+// 
+- (void)adjustScrollPositionWhenSearchDisplayControllerBecomeActive;
+
 @end
 
 

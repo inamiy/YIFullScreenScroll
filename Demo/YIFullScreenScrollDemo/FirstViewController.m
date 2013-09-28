@@ -32,6 +32,8 @@
 {
     [super viewDidLoad];
     
+    [self.searchDisplayController.searchResultsTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
+    
     self.fullScreenScroll = [[YIFullScreenScroll alloc] initWithViewController:self scrollView:self.tableView];
     self.fullScreenScroll.shouldShowUIBarsOnScrollUp = NO;
     
@@ -225,5 +227,17 @@
 //    
 //    return @"Tints Color";
 //}
+
+#pragma mark -
+
+#pragma mark UISearchBarDelegate
+
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    // NOTE: this code is needed for iOS7
+    [self.fullScreenScroll adjustScrollPositionWhenSearchDisplayControllerBecomeActive];
+    
+    return YES;
+}
 
 @end
