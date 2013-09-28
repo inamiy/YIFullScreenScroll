@@ -250,73 +250,6 @@ static char __isFullScreenScrollViewKey;
 
 #pragma mark Public
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        
-        // if no modal or 1st viewWillAppear
-        if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
-            
-            // evaluate defaultNavBarTop when view is loaded
-            _defaultNavBarTop = self.navigationBar.top;
-            
-            //
-            // comment-out:
-            //
-            // Always call _setupUIBarBackgrounds when enabled,
-            // since there is a case where modal is presented in other presentingViewController
-            // but is suddenly changed to _viewController e.g. via tabBar-switching.
-            //
-            //[self _setupUIBarBackgrounds];
-        }
-        [self _setupUIBarBackgrounds];
-        
-        // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
-        [self showUIBarsAnimated:NO];
-    }
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    if (self.enabled) {
-        // NOTE: required for tabBarController layouting
-        [self _layoutContainerViewExpanding:YES];
-    }
-    
-    self.isViewVisible = YES;   // set YES after layouting
-    self.hasViewAppearedBefore = YES;
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        
-        // if no modal
-        if (!_viewController.presentedViewController) {
-            [self _teardownUIBarBackgrounds];
-            [self showUIBarsAnimated:NO];
-        }
-    }
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-    self.isViewVisible = NO;
-    
-    if (self.enabled) {
-        [self _layoutContainerViewExpanding:NO];
-    }
-}
-
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-    [self showUIBarsAnimated:NO];
-}
-
 - (void)showUIBarsAnimated:(BOOL)animated
 {
     [self showUIBarsAnimated:animated completion:NULL];
@@ -802,6 +735,78 @@ static char __isFullScreenScrollViewKey;
     
     UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
     originalBackground.hidden = NO;
+}
+
+@end
+
+
+@implementation YIFullScreenScroll (ViewLifecycle)
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        
+        // if no modal or 1st viewWillAppear
+        if (!_viewController.presentedViewController || !self.hasViewAppearedBefore) {
+            
+            // evaluate defaultNavBarTop when view is loaded
+            _defaultNavBarTop = self.navigationBar.top;
+            
+            //
+            // comment-out:
+            //
+            // Always call _setupUIBarBackgrounds when enabled,
+            // since there is a case where modal is presented in other presentingViewController
+            // but is suddenly changed to _viewController e.g. via tabBar-switching.
+            //
+            //[self _setupUIBarBackgrounds];
+        }
+        [self _setupUIBarBackgrounds];
+        
+        // show after modal-dismiss too, since navBar/toolbar will automatically become visible but tabBar doesn't
+        [self showUIBarsAnimated:NO];
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    if (self.enabled) {
+        // NOTE: required for tabBarController layouting
+        [self _layoutContainerViewExpanding:YES];
+    }
+    
+    self.isViewVisible = YES;   // set YES after layouting
+    self.hasViewAppearedBefore = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        
+        // if no modal
+        if (!_viewController.presentedViewController) {
+            [self _teardownUIBarBackgrounds];
+            [self showUIBarsAnimated:NO];
+        }
+    }
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    self.isViewVisible = NO;
+    
+    if (self.enabled) {
+        [self _layoutContainerViewExpanding:NO];
+    }
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [self showUIBarsAnimated:NO];
 }
 
 @end

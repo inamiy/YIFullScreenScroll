@@ -50,7 +50,12 @@
 - (void)showUIBarsAnimated:(BOOL)animated;
 - (void)showUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 
+@end
+
+
 // used in UIViewController+YIFullScreenScroll
+@interface YIFullScreenScroll (ViewLifecycle)
+
 - (void)viewWillAppear:(BOOL)animated;
 - (void)viewDidAppear:(BOOL)animated;
 - (void)viewWillDisappear:(BOOL)animated;
