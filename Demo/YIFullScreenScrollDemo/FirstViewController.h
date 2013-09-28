@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FirstViewController : UITableViewController
+@interface FirstViewController : UITableViewController <UISearchBarDelegate>
 
 - (IBAction)handleToggleButton:(id)sender;
 - (IBAction)handleTintColorButton:(id)sender;
