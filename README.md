@@ -1,7 +1,7 @@
-YIFullScreenScroll 1.1.3
+YIFullScreenScroll 1.2.0
 ========================
 
-Pinterest-like scroll-to-fullscreen UI for iOS5+.
+Pinterest-like scroll-to-fullscreen UI for iOS5+ (including iOS7).
 
 <img src="https://raw.github.com/inamiy/YIFullScreenScroll/master/Screenshots/screenshot1.png" alt="ScreenShot1" width="225px" style="width:225px;" />
 
@@ -34,6 +34,18 @@ How to use
 //    self.fullScreenScroll.shouldHideNavigationBarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideToolbarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;
+}
+```
+
+If you are using `UISearchDisplayController` in iOS7, there is a searchBar-bug that doesn't respond to touches when you slightly scrolled down (about searchBar height) and then activate searchDisplayController. To prevent it, call below method on `-searchBarShouldBeginEditing:`.
+
+```
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    // NOTE: this code is needed for iOS7
+    [self.fullScreenScroll adjustScrollPositionWhenSearchDisplayControllerBecomeActive];
+    
+    return YES;
 }
 ```
 
