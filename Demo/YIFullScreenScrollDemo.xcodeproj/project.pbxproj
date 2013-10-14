@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1FB2C21D180C15A700CFABD5 /* navbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FB2C21C180C15A700CFABD5 /* navbar_bg@2x.png */; };
 		481CF1AC171BF0C900B83CE2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */; };
 		489EDE7A1578B435001206A5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE791578B435001206A5 /* UIKit.framework */; };
 		489EDE7C1578B435001206A5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 489EDE7B1578B435001206A5 /* Foundation.framework */; };
@@ -26,6 +27,7 @@
 
 /* Begin PBXFileReference section */
 		1B57D9CC7F864504B1072C13 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1FB2C21C180C15A700CFABD5 /* navbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "navbar_bg@2x.png"; sourceTree = "<group>"; };
 		481CF1AB171BF0C900B83CE2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		48965F2C1578B8C2005A393A /* Defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Defines.h; sourceTree = "<group>"; };
 		489EDE751578B435001206A5 /* YIFullScreenScrollDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YIFullScreenScrollDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +111,7 @@
 				489EDE961578B436001206A5 /* SecondViewController.m */,
 				489EDE981578B436001206A5 /* second.png */,
 				489EDE9A1578B436001206A5 /* second@2x.png */,
+				1FB2C21C180C15A700CFABD5 /* navbar_bg@2x.png */,
 				489EDE801578B435001206A5 /* Supporting Files */,
 			);
 			path = YIFullScreenScrollDemo;
@@ -186,6 +189,7 @@
 				489EDE991578B436001206A5 /* second.png in Resources */,
 				489EDE9B1578B436001206A5 /* second@2x.png in Resources */,
 				481CF1AC171BF0C900B83CE2 /* Default-568h@2x.png in Resources */,
+				1FB2C21D180C15A700CFABD5 /* navbar_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
