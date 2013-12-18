@@ -73,7 +73,7 @@ static char __isFullScreenScrollViewKey;
 
 @interface YIFullScreenScroll ()
 
-@property (nonatomic) BOOL isShowingUIBars;
+@property (nonatomic) BOOL areUIBarsAnimating;
 @property (nonatomic) BOOL isViewVisible;
 @property (nonatomic) BOOL hasViewAppearedBefore;
 
@@ -221,7 +221,7 @@ static char __isFullScreenScrollViewKey;
 {
     if (!self.enabled) return;
     
-    self.isShowingUIBars = YES;
+    self.areUIBarsAnimating = YES;
     
     if (animated) {
         
@@ -234,7 +234,7 @@ static char __isFullScreenScrollViewKey;
             
         } completion:^(BOOL finished) {
             
-            weakSelf.isShowingUIBars = NO;
+            weakSelf.areUIBarsAnimating = NO;
             
             if (completion) {
                 completion(finished);
@@ -244,9 +244,44 @@ static char __isFullScreenScrollViewKey;
     }
     else {
         [self _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
-        self.isShowingUIBars = NO;
+        self.areUIBarsAnimating = NO;
     }
+}
+
+- (void)hideUIBarsAnimated:(BOOL)animated
+{
+    [self hideUIBarsAnimated:animated completion:NULL];
+}
+
+- (void)hideUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
+{
+    if (!self.enabled) return;
     
+    self.areUIBarsAnimating = YES;
+    
+    if (animated) {
+        
+        __weak typeof(self) weakSelf = self;
+        
+        [UIView animateWithDuration:0.1 animations:^{
+            
+            // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
+            [weakSelf _layoutUIBarsWithDeltaY:50+_additionalNavBarShiftForIOS7StatusBar];
+            
+        } completion:^(BOOL finished) {
+            
+            weakSelf.areUIBarsAnimating = NO;
+            
+            if (completion) {
+                completion(finished);
+            }
+            
+        }];
+    }
+    else {
+        [self _layoutUIBarsWithDeltaY:50+_additionalNavBarShiftForIOS7StatusBar];
+        self.areUIBarsAnimating = NO;
+    }
 }
 
 - (void)adjustScrollPositionWhenSearchDisplayControllerBecomeActive
@@ -369,7 +404,7 @@ static char __isFullScreenScrollViewKey;
     
     UIScrollView* scrollView = self.scrollView;
     
-    if (!self.isShowingUIBars) {
+    if (!self.areUIBarsAnimating) {
         
         BOOL isContentHeightTooShortToLayoutUIBars = (scrollView.contentSize.height+scrollView.contentInset.bottom < scrollView.frame.size.height);
         BOOL isContentHeightTooShortToLimitShiftPerScroll = (scrollView.contentSize.height+scrollView.contentInset.bottom < scrollView.frame.size.height+100);
@@ -415,12 +450,12 @@ static char __isFullScreenScrollViewKey;
         if (offsetY > 0) {
             deltaY = MAX(deltaY, -maxShiftPerScroll);
         }
+        
+        // return if user hasn't dragged but trying to hide UI-bars (e.g. orientation change)
+        if (deltaY > 0 && !self.scrollView.isDragging && !self.shouldHideUIBarsWhenNotDragging) return;
     }
     
     if (deltaY == 0.0) return;
-    
-    // return if user hasn't dragged but trying to hide UI-bars (e.g. orientation change)
-    if (deltaY > 0 && !self.scrollView.isDragging && !self.shouldHideUIBarsWhenNotDragging) return;
     
     // navbar
     UINavigationBar* navBar = self.navigationBar;
