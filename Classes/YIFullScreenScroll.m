@@ -13,7 +13,15 @@
 
 #define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
 #define IS_IOS_AT_LEAST(ver)    ([[[UIDevice currentDevice] systemVersion] compare:ver] != NSOrderedAscending)
-#define IS_FLAT_DESIGN          (__IPHONE_OS_VERSION_MAX_ALLOWED >= 70000 && IS_IOS_AT_LEAST(@"7.0"))
+
+#if defined(__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+#   define IS_FLAT_DESIGN          IS_IOS_AT_LEAST(@"7.0")
+#else
+#   define IS_FLAT_DESIGN          NO
+#endif
+
+#define IS_PORTRAIT             UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation)
+#define STATUS_BAR_HEIGHT       (IS_PORTRAIT ? [UIApplication sharedApplication].statusBarFrame.size.height : [UIApplication sharedApplication].statusBarFrame.size.width)
 
 #define MAX_SHIFT_PER_SCROLL    10  // used when _shouldHideUIBarsGradually=YES
 
@@ -91,7 +99,6 @@ static char __isFullScreenScrollViewKey;
     UIEdgeInsets        _defaultScrollIndicatorInsets;
     
     CGFloat             _defaultNavBarTop;
-    CGFloat             _additionalNavBarShiftForIOS7StatusBar;
     
     BOOL _areUIBarBackgroundsReady;
     
@@ -106,12 +113,17 @@ static char __isFullScreenScrollViewKey;
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView
 {
+    return [self initWithViewController:viewController scrollView:scrollView style:YIFullScreenScrollStyleDefault];
+}
+
+- (id)initWithViewController:(UIViewController*)viewController
+                  scrollView:(UIScrollView*)scrollView
+                       style:(YIFullScreenScrollStyle)style
+{
     self = [super init];
     if (self) {
         
         _viewController = viewController;
-        
-        _additionalNavBarShiftForIOS7StatusBar = IS_FLAT_DESIGN ? 20 : 0;
         
         _shouldShowUIBarsOnScrollUp = YES;
         
@@ -129,6 +141,10 @@ static char __isFullScreenScrollViewKey;
         _enabled = YES; // don't call self.enabled = YES
         
         _layoutingUIBarsEnabled = YES;
+        
+        // call setter
+        _style = -1;
+        self.style = style;
         
         self.scrollView = scrollView;
         
@@ -208,6 +224,21 @@ static char __isFullScreenScrollViewKey;
     }
 }
 
+- (void)setStyle:(YIFullScreenScrollStyle)style
+{
+    if (style != _style) {
+        _style = style;
+        
+        // auto-adjust
+        if (IS_FLAT_DESIGN && style == YIFullScreenScrollStyleFacebook) {
+            _additionalOffsetYToStartShowing = -STATUS_BAR_HEIGHT;
+        }
+        else {
+            _additionalOffsetYToStartShowing = 0;
+        }
+    }
+}
+
 #pragma mark -
 
 #pragma mark Public
@@ -230,7 +261,7 @@ static char __isFullScreenScrollViewKey;
         [UIView animateWithDuration:0.1 animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
-            [weakSelf _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
+            [weakSelf _layoutUIBarsWithDeltaY:-50-self.additionalNavBarShiftForIOS7StatusBar];
             
         } completion:^(BOOL finished) {
             
@@ -243,7 +274,7 @@ static char __isFullScreenScrollViewKey;
         }];
     }
     else {
-        [self _layoutUIBarsWithDeltaY:-50-_additionalNavBarShiftForIOS7StatusBar];
+        [self _layoutUIBarsWithDeltaY:-50-self.additionalNavBarShiftForIOS7StatusBar];
         self.areUIBarsAnimating = NO;
     }
 }
@@ -266,7 +297,7 @@ static char __isFullScreenScrollViewKey;
         [UIView animateWithDuration:0.1 animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
-            [weakSelf _layoutUIBarsWithDeltaY:50+_additionalNavBarShiftForIOS7StatusBar];
+            [weakSelf _layoutUIBarsWithDeltaY:50+self.additionalNavBarShiftForIOS7StatusBar];
             
         } completion:^(BOOL finished) {
             
@@ -279,7 +310,7 @@ static char __isFullScreenScrollViewKey;
         }];
     }
     else {
-        [self _layoutUIBarsWithDeltaY:50+_additionalNavBarShiftForIOS7StatusBar];
+        [self _layoutUIBarsWithDeltaY:50+self.additionalNavBarShiftForIOS7StatusBar];
         self.areUIBarsAnimating = NO;
     }
 }
@@ -289,6 +320,18 @@ static char __isFullScreenScrollViewKey;
     if (IS_FLAT_DESIGN) {
         [self.scrollView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
     }
+}
+
+#pragma mark -
+
+#pragma mark Private
+
+- (CGFloat)additionalNavBarShiftForIOS7StatusBar
+{
+    // style=Facebook keeps statusBar-background visible, so pretend there's no additional navBar-shift
+    if (IS_FLAT_DESIGN && _style == YIFullScreenScrollStyleFacebook) return 0;
+    
+    return IS_FLAT_DESIGN ? STATUS_BAR_HEIGHT : 0;
 }
 
 #pragma mark -
@@ -462,7 +505,24 @@ static char __isFullScreenScrollViewKey;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
         if (canLayoutUIBars) {
-            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height-_additionalNavBarShiftForIOS7StatusBar), _defaultNavBarTop);
+            navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height-self.additionalNavBarShiftForIOS7StatusBar), _defaultNavBarTop);
+            
+            if (IS_FLAT_DESIGN && _style == YIFullScreenScrollStyleFacebook) {
+                CGFloat alpha = 1-(_defaultNavBarTop-navBar.top)/(navBar.height-5);  // -5 for faster fadeout
+                navBar.tintColor = [navBar.tintColor colorWithAlphaComponent:alpha];
+                
+                UIColor *titleTextColor = navBar.titleTextAttributes[NSForegroundColorAttributeName] ?: [UIColor blackColor];
+                titleTextColor = [titleTextColor colorWithAlphaComponent:alpha];
+                [navBar setTitleTextAttributes:@{ NSForegroundColorAttributeName : titleTextColor }];
+                
+                [_viewController.navigationItem.leftBarButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem* obj, NSUInteger idx, BOOL *stop) {
+                    obj.customView.alpha = alpha;
+                }];
+                [_viewController.navigationItem.rightBarButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem* obj, NSUInteger idx, BOOL *stop) {
+                    obj.customView.alpha = alpha;
+                }];
+                _viewController.navigationItem.titleView.alpha = alpha;
+            }
         }
     }
     
@@ -506,7 +566,7 @@ static char __isFullScreenScrollViewKey;
         // scrollIndicatorInsets
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
-            insets.top = navBar.bottom-_defaultNavBarTop+_additionalNavBarShiftForIOS7StatusBar;
+            insets.top = navBar.bottom-_defaultNavBarTop+self.additionalNavBarShiftForIOS7StatusBar;
         }
         insets.bottom = 0;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {

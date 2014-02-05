@@ -34,7 +34,7 @@
     
     [self.searchDisplayController.searchResultsTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
     
-    self.fullScreenScroll = [[YIFullScreenScroll alloc] initWithViewController:self scrollView:self.tableView];
+    self.fullScreenScroll = [[YIFullScreenScroll alloc] initWithViewController:self scrollView:self.tableView style:YIFullScreenScrollStyleFacebook];
     self.fullScreenScroll.shouldShowUIBarsOnScrollUp = NO;
     
 //    self.fullScreenScroll.shouldHideNavigationBarOnScroll = NO;
