@@ -11,6 +11,13 @@
 
 @protocol YIFullScreenScrollDelegate;
 
+typedef NS_ENUM(NSInteger, YIFullScreenScrollStyle) {
+    YIFullScreenScrollStyleDefault,     // no statusBar-background when navBar is hidden
+#if defined(__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+    YIFullScreenScrollStyleFacebook,    // like facebook ver 6.0, remaining navBar for statusBar-background in iOS7
+#endif
+};
+
 //
 // NOTE:
 // YIFullScreenScroll forces viewController.navigationController's navigationBar/toolbar
@@ -24,9 +31,10 @@
 @property (nonatomic, weak) UIViewController* viewController;
 @property (nonatomic, strong) UIScrollView* scrollView;
 
-@property (nonatomic) BOOL enabled; // default = YES
+@property (nonatomic) YIFullScreenScrollStyle style;
 
-@property (nonatomic) BOOL layoutingUIBarsEnabled; // can pause layouting UI-bars, default = YES
+@property (nonatomic) BOOL enabled;                 // default = YES
+@property (nonatomic) BOOL layoutingUIBarsEnabled;  // can pause layouting UI-bars, default = YES
 
 @property (nonatomic) BOOL shouldShowUIBarsOnScrollUp;      // default = YES
 
@@ -41,11 +49,16 @@
 
 @property (nonatomic) BOOL shouldHideUIBarsWhenContentHeightIsTooShort; // default = NO
 
+// offsetY for start hiding & showing back again on top
 @property (nonatomic) CGFloat additionalOffsetYToStartHiding;   // default = 0.0
-@property (nonatomic) CGFloat additionalOffsetYToStartShowing;  // default = 0.0
+@property (nonatomic) CGFloat additionalOffsetYToStartShowing;  // default = 0.0, will be adjusted on every setStyle
 
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView;
+
+- (id)initWithViewController:(UIViewController*)viewController
+                  scrollView:(UIScrollView*)scrollView
+                       style:(YIFullScreenScrollStyle)style;
 
 - (void)showUIBarsAnimated:(BOOL)animated;
 - (void)showUIBarsAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
