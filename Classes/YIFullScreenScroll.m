@@ -567,6 +567,10 @@ static char __isFullScreenScrollViewKey;
         UIEdgeInsets insets = scrollView.scrollIndicatorInsets;
         if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
             insets.top = navBar.bottom-_defaultNavBarTop+self.additionalNavBarShiftForIOS7StatusBar;
+            
+            if (IS_FLAT_DESIGN && _style == YIFullScreenScrollStyleFacebook) {
+                insets.top += STATUS_BAR_HEIGHT;
+            }
         }
         insets.bottom = 0;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {
