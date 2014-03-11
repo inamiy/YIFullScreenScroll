@@ -730,6 +730,7 @@ static char __isFullScreenScrollViewKey;
 - (void)_addCustomBackgroundOnUIBar:(UIView*)bar
 {
     if (!bar) return;
+    if (bar.subviews.count == 0) return;
     
     BOOL isUIBarHidden = NO;
     
@@ -811,6 +812,8 @@ static char __isFullScreenScrollViewKey;
     else {
         return;
     }
+    
+    if (bar.subviews.count == 0) return;
     
     UIImageView* originalBackground = [bar.subviews objectAtIndex:0];
     originalBackground.hidden = NO;
