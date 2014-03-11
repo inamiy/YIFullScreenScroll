@@ -504,24 +504,33 @@ static char __isFullScreenScrollViewKey;
     UINavigationBar* navBar = self.navigationBar;
     BOOL isNavigationBarExisting = self.isNavigationBarExisting;
     if (isNavigationBarExisting && _shouldHideNavigationBarOnScroll) {
+        
         if (canLayoutUIBars) {
+            
             navBar.top = MIN(MAX(navBar.top-deltaY, _defaultNavBarTop-navBar.height-self.additionalNavBarShiftForIOS7StatusBar), _defaultNavBarTop);
             
+            //
+            // fade-out left/right/title navBar-subviews for style=Facebook
+            // (NOTE: don't fade background or _UINavigationBarBackIndicatorView)
+            //
             if (IS_FLAT_DESIGN && _style == YIFullScreenScrollStyleFacebook) {
-                CGFloat alpha = 1-(_defaultNavBarTop-navBar.top)/(navBar.height-5);  // -5 for faster fadeout
-                navBar.tintColor = [navBar.tintColor colorWithAlphaComponent:alpha];
                 
+                CGFloat alpha = 1-(_defaultNavBarTop-navBar.top)/(navBar.height-5);  // -5 for faster fadeout
+                
+                // for non-customized title
                 UIColor *titleTextColor = navBar.titleTextAttributes[NSForegroundColorAttributeName] ?: [UIColor blackColor];
                 titleTextColor = [titleTextColor colorWithAlphaComponent:alpha];
                 [navBar setTitleTextAttributes:@{ NSForegroundColorAttributeName : titleTextColor }];
                 
-                [_viewController.navigationItem.leftBarButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem* obj, NSUInteger idx, BOOL *stop) {
-                    obj.customView.alpha = alpha;
-                }];
-                [_viewController.navigationItem.rightBarButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem* obj, NSUInteger idx, BOOL *stop) {
-                    obj.customView.alpha = alpha;
-                }];
+                // for customized title
                 _viewController.navigationItem.titleView.alpha = alpha;
+                
+                // for left/right barButtonItems (both customized & non-customized)
+                for (UIButton* navButton in _viewController.navigationController.navigationBar.subviews) {
+                    if (![navButton isKindOfClass:[UIButton class]]) continue;
+                    
+                    navButton.alpha = alpha;
+                }
             }
         }
     }
