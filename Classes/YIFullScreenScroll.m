@@ -530,12 +530,20 @@ static char __isFullScreenScrollViewKey;
                 [navBar setTitleTextAttributes:@{ NSForegroundColorAttributeName : titleTextColor }];
                 
                 // for customized title
-                _viewController.navigationItem.titleView.alpha = alpha;
+                if (![_viewController.navigationItem.titleView conformsToProtocol:@protocol(YIFullScreenScrollNoFading)]) {
+                    _viewController.navigationItem.titleView.alpha = alpha;
+                }
                 
                 // for left/right barButtonItems (both customized & non-customized)
                 for (UIButton* navSubview in _viewController.navigationController.navigationBar.subviews) {
                     
-                    if (navSubview == [self _backgroundOnUIBar:navBar] || navSubview.hidden || navSubview.alpha <= 0) continue;
+                    if ([navSubview conformsToProtocol:@protocol(YIFullScreenScrollNoFading)]||
+                        navSubview == [self _backgroundOnUIBar:navBar] ||
+                        navSubview.hidden ||
+                        navSubview.alpha <= 0) {
+                        
+                        continue;
+                    }
                     
                     navSubview.alpha = alpha;
                 }

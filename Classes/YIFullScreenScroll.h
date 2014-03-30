@@ -105,3 +105,7 @@ typedef NS_ENUM(NSInteger, YIFullScreenScrollStyle) {
 - (void)fullScreenScrollDidLayoutUIBars:(YIFullScreenScroll*)fullScreenScroll;
 
 @end
+
+
+@protocol YIFullScreenScrollNoFading
+@end
