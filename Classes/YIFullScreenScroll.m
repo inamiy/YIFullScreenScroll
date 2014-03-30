@@ -515,7 +515,14 @@ static char __isFullScreenScrollViewKey;
             //
             if (IS_FLAT_DESIGN && _style == YIFullScreenScrollStyleFacebook) {
                 
-                CGFloat alpha = 1-(_defaultNavBarTop-navBar.top)/(navBar.height-5);  // -5 for faster fadeout
+                //
+                // NOTE:
+                // _UINavigationBarBackIndicatorView has alpha=0 for navigationController.rootViewController,
+                // so use hiddenAlpha (> 0) to ignore indicatorView from fade-in/out.
+                //
+                const CGFloat hiddenAlpha = 0.001;
+                
+                CGFloat alpha = MAX(1-(_defaultNavBarTop-navBar.top)/(navBar.height-5), hiddenAlpha);  // -5 for faster fadeout
                 
                 // for non-customized title
                 UIColor *titleTextColor = navBar.titleTextAttributes[NSForegroundColorAttributeName] ?: [UIColor blackColor];
@@ -526,10 +533,11 @@ static char __isFullScreenScrollViewKey;
                 _viewController.navigationItem.titleView.alpha = alpha;
                 
                 // for left/right barButtonItems (both customized & non-customized)
-                for (UIButton* navButton in _viewController.navigationController.navigationBar.subviews) {
-                    if (![navButton isKindOfClass:[UIButton class]]) continue;
+                for (UIButton* navSubview in _viewController.navigationController.navigationBar.subviews) {
                     
-                    navButton.alpha = alpha;
+                    if (navSubview == [self _backgroundOnUIBar:navBar] || navSubview.hidden || navSubview.alpha <= 0) continue;
+                    
+                    navSubview.alpha = alpha;
                 }
             }
         }
@@ -647,6 +655,18 @@ static char __isFullScreenScrollViewKey;
 
 #pragma mark Custom Background
 
+- (UIView*)_backgroundOnUIBar:(UIView*)bar
+{
+    if (bar == self.navigationBar) {
+        return _customNavBarBackground ?: bar.subviews[0];
+    }
+    else if (bar == self.toolbar) {
+        return _customToolbarBackground ?: bar.subviews[0];
+    }
+    
+    return nil;
+}
+
 - (void)_setupUIBarBackgrounds
 {
     if (_areUIBarBackgroundsReady) return;
@@ -717,22 +737,6 @@ static char __isFullScreenScrollViewKey;
     }
     
     _areUIBarBackgroundsReady = NO;
-}
-
-- (BOOL)_hasCustomBackgroundOnUIBar:(UIView*)bar
-{
-    if ([bar.subviews count] <= 1) return NO;
-    
-    UIView* subview1 = [bar.subviews objectAtIndex:1];
-    
-    if (![subview1 isKindOfClass:[UIImageView class]]) return NO;
-    
-    if (CGRectEqualToRect(bar.bounds, subview1.frame)) {
-        return YES;
-    }
-    else {
-        return NO;
-    }
 }
 
 // removes old & add new custom background for UINavigationBar/UIToolbar
