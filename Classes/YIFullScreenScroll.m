@@ -765,7 +765,7 @@ static char __isFullScreenScrollViewKey;
         // temporarily show navigationBar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.navigationBarHidden;
         if (isUIBarHidden) {
-            [self.navigationController setNavigationBarHidden:NO];
+            self.navigationBar.hidden = NO;
         }
     }
     else if (bar == self.toolbar) {
@@ -777,7 +777,7 @@ static char __isFullScreenScrollViewKey;
         // temporarily show toolbar to copy backgroundImage safely
         isUIBarHidden = self.navigationController.toolbarHidden;
         if (isUIBarHidden) {
-            [self.navigationController setToolbarHidden:NO];
+            self.toolbar.hidden = NO;
         }
     }
     
@@ -806,7 +806,7 @@ static char __isFullScreenScrollViewKey;
         
         // hide navigationBar if needed
         if (isUIBarHidden) {
-            [self.navigationController setNavigationBarHidden:YES];
+            self.navigationBar.hidden = YES;
         }
     }
     else if (bar == self.toolbar) {
@@ -817,7 +817,7 @@ static char __isFullScreenScrollViewKey;
         
         // hide toolbar if needed
         if (isUIBarHidden) {
-            [self.navigationController setToolbarHidden:YES];
+            self.toolbar.hidden = YES;
         }
     }
 }

@@ -107,6 +107,22 @@
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
 
+- (IBAction)handlePushButton:(id)sender
+{
+    UIViewController* vc = [self.storyboard instantiateViewControllerWithIdentifier:@"FirstViewController"];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (IBAction)handlePushToolbarButton:(id)sender
+{
+    UIViewController* vc = [self.storyboard instantiateViewControllerWithIdentifier:@"FirstViewController"];
+    vc.hidesBottomBarWhenPushed = YES;
+    
+    UIBarButtonItem* item = [[UIBarButtonItem alloc] initWithTitle:@"Dummy" style:UIBarButtonItemStylePlain target:nil action:nil];
+    vc.toolbarItems = @[ item ];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
 - (IBAction)handleTintColorButton:(id)sender
 {
     UIColor* randomColor = [UIColor colorWithHue:(arc4random()%100)/100.0 saturation:0.8 brightness:0.8 alpha:1];
@@ -134,7 +150,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (section == 0) {
-        return 1;
+        return 3;
     }
     
     return 50;
@@ -146,61 +162,49 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
     if (indexPath.section == 0) {
-        cell.textLabel.text = @"Show in Modal";
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        
+        switch (indexPath.row) {
+            case 0:
+                cell.textLabel.text = @"Show in Modal";
+                break;
+            case 1:
+                cell.textLabel.text = @"Push";
+                break;
+            case 2:
+                cell.textLabel.text = @"Push + Toolbar";
+                break;
+            default:
+                break;
+        }
         return cell;
     }
     
     // Configure the cell...
     cell.textLabel.text = [NSString stringWithFormat:@"Cell %d-%d",indexPath.section,indexPath.row];
+    cell.accessoryType = UITableViewCellAccessoryNone;
     
     return cell;
 }
-
-/*
- // Override to support conditional editing of the table view.
- - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
- {
- // Return NO if you do not want the specified item to be editable.
- return YES;
- }
- */
-
-/*
- // Override to support editing the table view.
- - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
- {
- if (editingStyle == UITableViewCellEditingStyleDelete) {
- // Delete the row from the data source
- [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
- }   
- else if (editingStyle == UITableViewCellEditingStyleInsert) {
- // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
- }   
- }
- */
-
-/*
- // Override to support rearranging the table view.
- - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
- {
- }
- */
-
-/*
- // Override to support conditional rearranging of the table view.
- - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
- {
- // Return NO if you do not want the item to be re-orderable.
- return YES;
- }
- */
 
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 0) {
-        [self handleModalPresentButton:nil];
+        switch (indexPath.row) {
+            case 0:
+                [self handleModalPresentButton:nil];
+                break;
+            case 1:
+                [self handlePushButton:nil];
+                break;
+            case 2:
+                [self handlePushToolbarButton:nil];
+                break;
+            default:
+                break;
+        }
         return;
     }
     
