@@ -787,7 +787,7 @@ static char __isFullScreenScrollViewKey;
     
     // don't create customBarImageView for iOS7 default flat-design
     if (!IS_FLAT_DESIGN || originalBackground.image) {
-        UIImageView* customBarImageView = [[UIImageView alloc] initWithImage:[originalBackground.image copy]];
+        customBarImageView = [[UIImageView alloc] initWithImage:[originalBackground.image copy]];
         [bar insertSubview:customBarImageView atIndex:0];
         
         originalBackground.hidden = YES;
@@ -811,7 +811,7 @@ static char __isFullScreenScrollViewKey;
     }
     else if (bar == self.toolbar) {
         if (!IS_FLAT_DESIGN || customBarImageView) {
-            self.navigationBar.translucent = YES;
+            self.toolbar.translucent = YES;
         }
         _customToolbarBackground = customBarImageView;
         
