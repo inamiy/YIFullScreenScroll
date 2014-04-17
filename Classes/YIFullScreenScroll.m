@@ -138,6 +138,8 @@ static char __isFullScreenScrollViewKey;
         _additionalOffsetYToStartHiding = 0.0;
         _additionalOffsetYToStartShowing = 0.0;
         
+        _showHideAnimationDuration = 0.1;
+        
         _enabled = YES; // don't call self.enabled = YES
         
         _layoutingUIBarsEnabled = YES;
@@ -258,7 +260,7 @@ static char __isFullScreenScrollViewKey;
         
         __weak typeof(self) weakSelf = self;
         
-        [UIView animateWithDuration:0.1 animations:^{
+        [UIView animateWithDuration:self.showHideAnimationDuration animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
             [weakSelf _layoutUIBarsWithDeltaY:-50-self.additionalNavBarShiftForIOS7StatusBar];
@@ -294,7 +296,7 @@ static char __isFullScreenScrollViewKey;
         
         __weak typeof(self) weakSelf = self;
         
-        [UIView animateWithDuration:0.1 animations:^{
+        [UIView animateWithDuration:self.showHideAnimationDuration animations:^{
             
             // pretend to scroll up by 50 pt which is longer than navBar/toolbar/tabBar height
             [weakSelf _layoutUIBarsWithDeltaY:50+self.additionalNavBarShiftForIOS7StatusBar];

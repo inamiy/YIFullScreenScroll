@@ -53,6 +53,8 @@ typedef NS_ENUM(NSInteger, YIFullScreenScrollStyle) {
 @property (nonatomic) CGFloat additionalOffsetYToStartHiding;   // default = 0.0
 @property (nonatomic) CGFloat additionalOffsetYToStartShowing;  // default = 0.0, will be adjusted on every setStyle
 
+@property (nonatomic) CGFloat showHideAnimationDuration;    // default = 0.1
+
 - (id)initWithViewController:(UIViewController*)viewController
                   scrollView:(UIScrollView*)scrollView;
 
