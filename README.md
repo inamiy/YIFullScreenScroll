@@ -1,13 +1,21 @@
-YIFullScreenScroll 1.3.1
+YIFullScreenScroll 1.4.0
 ========================
 
 Pinterest-like scroll-to-fullscreen UI for iOS5+ (including iOS7).
 
-<img src="https://raw.github.com/inamiy/YIFullScreenScroll/master/Screenshots/screenshot1.png" alt="ScreenShot1" width="225px" style="width:225px;" />
+<img src="Screenshots/screenshot1.png" alt="ScreenShot1" width="320" />
 
-From version 1.0.0, `YIFullScreenScroll` uses [JRSwizzle](https://github.com/rentzsch/jrswizzle/) to extend `UIViewController`'s functionality, and KVO (Key-Value-Observing) instead of conforming to `UIScrollViewDelegate` for easiler implementation.
 
-There are slight changes in its APIs too, so please see header files for more details.
+Architecture
+------------
+
+- To achieve scroll-to-fullscreen behavior, `YIFullScreenScroll` uses [JRSwizzle](https://github.com/rentzsch/jrswizzle/) to extend `UIViewController`'s functionality, and KVO (Key-Value-Observing) instead of conforming to `UIScrollViewDelegate` for easiler implementation.
+
+- `YIFullScreenScroll` enables/disables its functionality when `viewWillAppear` or `viewWillDisappear` is called. This means, fullscreen will not continue to the next pushed (2nd) viewController, and if you want to keep it, you also need to setup `self.fullScreenScroll` to the 2nd viewController's `viewDidLoad`.
+
+- `YIFullScreenScroll` can only handle UINavigationController/UITabBarController's top & bottom UI-bars as default. To further adjust your custom UI-bar's layout, use `-fullScreenScrollDidLayoutUIBars:` delegate method (see [Issue #12](https://github.com/inamiy/YIFullScreenScroll/issues/12) for more detail).
+
+
 
 Install via [CocoaPods](http://cocoapods.org/)
 ----------
@@ -15,27 +23,35 @@ Install via [CocoaPods](http://cocoapods.org/)
 ```
 pod 'YIFullScreenScroll'
 ```
-    
+
+
 How to use
 ----------
 
 ```
-#import "YIFullScreenScroll.h"
-
-...
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    self.fullScreenScroll = [[YIFullScreenScroll alloc] initWithViewController:self scrollView:self.tableView];
+
+    self.fullScreenScroll = [[YIFullScreenScroll alloc] initWithViewController:self scrollView:self.tableView style:YIFullScreenScrollStyleFacebook];
+    self.fullScreenScroll.delegate = self;
     self.fullScreenScroll.shouldShowUIBarsOnScrollUp = NO;
-    
+
 //    self.fullScreenScroll.shouldHideNavigationBarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideToolbarOnScroll = NO;
 //    self.fullScreenScroll.shouldHideTabBarOnScroll = NO;
 }
+
+// implement below to further adjust your custom UI-bar's layout
+- (void)fullScreenScrollDidLayoutUIBars:(YIFullScreenScroll*)fullScreenScroll 
+{
+    CGRect newFrame = self.customBar.frame;
+    newFrame.origin.y += self.navigationController.navigationBar.frame.size.height;
+    self.customBar.frame = newFrame;
+}
+
 ```
+
 
 Style
 -----
@@ -43,11 +59,12 @@ Style
 ```
 typedef NS_ENUM(NSInteger, YIFullScreenScrollStyle) {
     YIFullScreenScrollStyleDefault,     // no statusBar-background when navBar is hidden
-#if defined(__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+#if defined(__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0    
     YIFullScreenScrollStyleFacebook,    // like facebook ver 6.0, remaining navBar for statusBar-background in iOS7
 #endif
 };
 ```
+
 
 UISearchDisplayController issue
 -------------------------------
@@ -59,15 +76,17 @@ If you are using `UISearchDisplayController` in iOS7, there is a searchBar-bug t
 {
     // NOTE: this code is needed for iOS7
     [self.fullScreenScroll adjustScrollPositionWhenSearchDisplayControllerBecomeActive];
-    
+
     return YES;
 }
 ```
+
 
 Dependencies
 ------------
 - [JRSwizzle 1.0](https://github.com/rentzsch/jrswizzle)
 - [ViewUtils 1.1](https://github.com/nicklockwood/ViewUtils)
+
 
 License
 -------
