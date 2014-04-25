@@ -529,7 +529,9 @@ static char __isFullScreenScrollViewKey;
                 // for non-customized title
                 UIColor *titleTextColor = navBar.titleTextAttributes[NSForegroundColorAttributeName] ?: [UIColor blackColor];
                 titleTextColor = [titleTextColor colorWithAlphaComponent:alpha];
-                [navBar setTitleTextAttributes:@{ NSForegroundColorAttributeName : titleTextColor }];
+                NSMutableDictionary *titleTextAttributes = [navBar.titleTextAttributes mutableCopy];
+                [titleTextAttributes setObject:titleTextColor forKey:NSForegroundColorAttributeName];
+                [navBar setTitleTextAttributes:titleTextAttributes];
                 
                 // for customized title
                 if (![_viewController.navigationItem.titleView conformsToProtocol:@protocol(YIFullScreenScrollNoFading)]) {
