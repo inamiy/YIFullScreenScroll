@@ -577,7 +577,7 @@ static char __isFullScreenScrollViewKey;
     UITabBar* tabBar = self.tabBar;
     BOOL isTabBarExisting = self.isTabBarExisting;
     CGFloat tabBarSuperviewHeight = 0;
-    if (isTabBarExisting && _shouldHideTabBarOnScroll) {
+    if (isTabBarExisting) {
         if ([tabBar.superview.superview isKindOfClass:[UIWindow class]]) {
             tabBarSuperviewHeight = IS_PORTRAIT ? tabBar.superview.height : tabBar.superview.width;
         }
@@ -585,7 +585,7 @@ static char __isFullScreenScrollViewKey;
             tabBarSuperviewHeight = tabBar.superview.height;
         }
         
-        if (canLayoutUIBars) {
+        if (canLayoutUIBars && _shouldHideTabBarOnScroll) {
             tabBar.top = MIN(MAX(tabBar.top+deltaY, tabBarSuperviewHeight-tabBar.height), tabBarSuperviewHeight);
         }
     }
@@ -605,8 +605,11 @@ static char __isFullScreenScrollViewKey;
         if (isToolbarExisting && _shouldHideToolbarOnScroll) {
             insets.bottom += toolbarSuperviewHeight-toolbar.top;
         }
-        if (isTabBarExisting && _shouldHideTabBarOnScroll) {
-            insets.bottom += tabBarSuperviewHeight-tabBar.top;
+        if (isTabBarExisting) {
+            // NOTE: don't adjust scrollIndicatorInsets.bottom for iOS6 + not hiding
+            if (IS_FLAT_DESIGN || _shouldHideTabBarOnScroll) {
+                insets.bottom += tabBarSuperviewHeight-tabBar.top;
+            }
         }
         scrollView.scrollIndicatorInsets = insets;
         
