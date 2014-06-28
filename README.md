@@ -46,7 +46,10 @@ How to use
 - (void)fullScreenScrollDidLayoutUIBars:(YIFullScreenScroll*)fullScreenScroll 
 {
     CGRect newFrame = self.customBar.frame;
-    newFrame.origin.y += self.navigationController.navigationBar.frame.size.height;
+    
+    // Grab navigationBar's frame using UIView's converting method e.g. -convertRect:toView: to adjust your customView's position on your own.
+    newFrame.origin.y = ...
+    
     self.customBar.frame = newFrame;
 }
 
